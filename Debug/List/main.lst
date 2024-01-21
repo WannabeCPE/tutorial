@@ -1,0 +1,1183 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V7.20.1.997/W32 for MSP430           16/Dec/2020  20:35:50
+# Copyright 1996-2020 IAR Systems AB.
+# PC-locked license - IAR Embedded Workbench for MSP430, 8K KickStart Edition 7.20
+#
+#    __rt_version  =  3
+#    __double_size =  32
+#    __reg_r4      =  free
+#    __reg_r5      =  free
+#    __pic         =  no
+#    __core        =  430X
+#    __data_model  =  small
+#    __code_model  =  large
+#    Source file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_10\main.c
+#    Command line  =  
+#        -f C:\Users\19196\AppData\Local\Temp\EWCAFB.tmp
+#        ("C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_10\main.c"
+#        -lC "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\Debug\List" -o
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\Debug\Obj" --no_cse --no_unroll --no_inline
+#        --no_code_motion --no_tbaa --debug -D__MSP430FR2355__ -e --double=32
+#        --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.4\430\lib\dlib\dl430xlsfn.h" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.4\430\" --core=430X --data_model=small
+#        -On --multiplier=32 --hw_workaround=CPU40 --code_model=large)
+#    Locale        =  English_USA.1252
+#    List file     =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\Debug\List\main.lst
+#    Object file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\Debug\Obj\main.r43
+#
+###############################################################################
+
+C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_10\main.c
+      1          //------------------------------------------------------------------------------
+      2          //
+      3          //  Description: This file contains the Main Routine - "While" Operating System
+      4          //
+      5          //
+      6          //  Cody Lane
+      7          //  Aug 2020
+      8          //  Built with IAR Embedded Workbench Version: V7.20.1 
+      9          //------------------------------------------------------------------------------
+     10          
+     11          //------------------------------------------------------------------------------
+     12          #include  "msp430.h"
+
+   \                                 In  segment DATA16_AN, at 0x130
+   \   union <unnamed> _A_PM5CTL0_L
+   \                     _A_PM5CTL0_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x382
+   \   union <unnamed> _A_TB0CCTL0_L
+   \                     _A_TB0CCTL0_L:
+   \   000000                DS8 2
+     13          #include  "functions.h"
+     14          #include <string.h>
+     15          #include  "macros.h"
+     16          
+     17          
+     18          
+     19          // Global Variables
+     20          extern char pwm;
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     21          volatile char slow_input_down;
+   \                     slow_input_down:
+   \   000000                DS8 1
+     22          extern char display_line[4][11];
+     23          extern char *display[4];
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     24          unsigned char display_mode;
+   \                     display_mode:
+   \   000000                DS8 1
+     25          extern volatile unsigned char display_changed;
+     26          extern volatile unsigned int update_display_count;
+     27          extern volatile unsigned char update_display;
+     28          extern volatile unsigned int Time_Sequence;
+     29          extern volatile char one_time;
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     30          volatile unsigned int wheel_run;
+   \                     wheel_run:
+   \   000000                DS8 2
+     31          extern unsigned int wheel_on_count;
+     32          extern char wheels_on;
+     33          extern unsigned int running;
+     34          extern char wheel_direction;
+     35          extern char number_of_runs;
+     36          extern char move_state;
+     37          extern char next_state;
+     38          extern char last_state;
+     39          extern volatile unsigned int update_display_count;
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     40          char display_adc;
+   \                     display_adc:
+   \   000000                DS8 1
+     41          extern char iot_start;
+     42          
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     43          volatile char drive_state = NONE;
+   \                     drive_state:
+   \   000000                DS8 1
+   \   000001                REQUIRE `?<Initializer for drive_state>`
+     44          
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     45          char iot_command_display[11] = "          ";
+   \                     iot_command_display:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for iot_command_display>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     46          char BR_0[11] =  " 115,200  ";
+   \                     BR_0:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for BR_0>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     47          char BR_1[11] =  " 460,800  " ;
+   \                     BR_1:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for BR_1>`
+     48          
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     49          char course_timer_ones_char[5];
+   \                     course_timer_ones_char:
+   \   000000                DS8 5
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     50          char int_char[5];
+   \                     int_char:
+   \   000000                DS8 5
+     51          extern volatile unsigned int course_timer_ones_count;
+     52          extern volatile unsigned int course_timer_decimal_count;
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     53          char course_timer_display[11] = "Time 000.0";
+   \                     course_timer_display:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for course_timer_display>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     54          char marker_display[11] = "Arrived:  ";
+   \                     marker_display:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for marker_display>`
+     55          
+     56          extern char SSID[11];
+     57          extern char IP_address[SMALL_RING_SIZE + 1];
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     58          char display_0[11] = "          ";
+   \                     display_0:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for display_0>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     59          char display_1[11] = "          ";
+   \                     display_1:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for display_1>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     60          char display_2[11] = "          ";
+   \                     display_2:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for display_2>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     61          char display_3[11] = "          ";
+   \                     display_3:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for display_3>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     62          char display_out[11] =  "          " ;
+   \                     display_out:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for display_out>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     63          volatile char display_state = NONE;
+   \                     display_state:
+   \   000000                DS8 1
+   \   000001                REQUIRE `?<Initializer for display_state>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     64          volatile char old_display_state = NONE;
+   \                     old_display_state:
+   \   000000                DS8 1
+   \   000001                REQUIRE `?<Initializer for old_display_state>`
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     65          char emitter_state = 0;
+   \                     emitter_state:
+   \   000000                DS8 1
+     66          extern volatile char speed;
+     67          
+     68          extern unsigned int marker_count;
+     69          extern volatile char marker_found;
+     70          
+     71          
+     72          
+     73          
+     74          
+
+   \                                 In  segment CODE, align 2
+     75          void main(void) {
+   \                     main:
+     76          	//------------------------------------------------------------------------------
+     77          	// Main Program
+     78          	// This is the main routine for the program. Execution of code starts here.
+     79          	// The operating system is Back Ground Fore Ground.
+     80          	//
+     81          	//------------------------------------------------------------------------------
+     82          
+     83          	PM5CTL0 &= ~LOCKLPM5;
+   \   000000   92C33001     BIC.W   #0x1, &0x130
+     84          	Init_Ports();                        // Initialize Ports
+   \   000004   ........     CALLA   #Init_Ports
+     85          	// Disable the GPIO power-on default high-impedance mode to activate
+     86          	// previously configured port settings
+     87          
+     88          	Init_Clocks();                       // Initialize Clock System
+   \   000008   ........     CALLA   #Init_Clocks
+     89          	Init_Conditions();                   // Initialize Variables and Initial Conditions
+   \   00000C   ........     CALLA   #Init_Conditions
+     90          	Init_Timers();                       // Initialize Timers
+   \   000010   ........     CALLA   #Init_Timers
+     91          	Init_ADC();
+   \   000014   ........     CALLA   #Init_ADC
+     92          	Init_DAC();
+   \   000018   ........     CALLA   #Init_DAC
+     93          	Init_LCD();                          // Initialize LCD
+   \   00001C   ........     CALLA   #Init_LCD
+     94          	Init_Serial(speed); // Initialize Serial Port for USB
+   \   000020   5C42....     MOV.B   &speed, R12
+   \   000024   ........     CALLA   #Init_Serial
+     95          
+     96          	// Init_Switches();                     // Initialize Switches
+     97          
+     98          	display_mode = ORIGINAL;
+   \   000028   C243....     MOV.B   #0x0, &display_mode
+     99          
+    100          	strcpy(display_line[0], " ECE-306  ");
+   \   00002C   3D40....     MOV.W   #`?<Constant " ECE-306  ">`, R13
+   \   000030   3C40....     MOV.W   #display_line, R12
+   \   000034   ........     CALLA   #strcpy
+    101          	update_string(display_line[0], 0);
+   \   000038   0D43         MOV.W   #0x0, R13
+   \   00003A   ........     CALLA   #update_string
+    102          	strcpy(display_line[1], " Voltages ");
+   \   00003E   3D40....     MOV.W   #`?<Constant " Voltages ">`, R13
+   \   000042   3C40....     MOV.W   #display_line + 11, R12
+   \   000046   ........     CALLA   #strcpy
+    103          	update_string(display_line[1], 1);
+   \   00004A   1D43         MOV.W   #0x1, R13
+   \   00004C   3C40....     MOV.W   #display_line + 11, R12
+   \   000050   ........     CALLA   #update_string
+    104          	strcpy(display_line[2], "BAT   CONV");
+   \   000054   3D40....     MOV.W   #`?<Constant "BAT   CONV">`, R13
+   \   000058   3C40....     MOV.W   #display_line + 22, R12
+   \   00005C   ........     CALLA   #strcpy
+    105          	update_string(display_line[2], 2);
+   \   000060   2D43         MOV.W   #0x2, R13
+   \   000062   3C40....     MOV.W   #display_line + 22, R12
+   \   000066   ........     CALLA   #update_string
+    106          	strcpy(display_line[3], "L    R    ");
+   \   00006A   3D40....     MOV.W   #`?<Constant "L    R    ">`, R13
+   \   00006E   3C40....     MOV.W   #display_line + 33, R12
+   \   000072   ........     CALLA   #strcpy
+    107          	update_string(display_line[3], 3);
+   \   000076   3D400300     MOV.W   #0x3, R13
+   \   00007A   3C40....     MOV.W   #display_line + 33, R12
+   \   00007E   ........     CALLA   #update_string
+    108          
+    109          
+    110          	TB0CCTL0 |= CCIE;
+   \   000082   B2D010008203 BIS.W   #0x10, &0x382
+    111          	//  move_state = STOP;
+    112          
+    113          	  //------------------------------------------------------------------------------
+    114          	  // Begining of the "While" Operating System
+    115          	  //------------------------------------------------------------------------------
+    116          
+    117          	while (ALWAYS) {    // Can the Operating system run
+    118          		menu();
+   \                     ??main_0:
+   \   000088   ........     CALLA   #menu
+    119          		transmit_2_iot();
+   \   00008C   ........     CALLA   #transmit_2_iot
+    120          		carrot_command_buffer();
+   \   000090   ........     CALLA   #carrot_command_buffer
+    121          		iot_command_buffer();
+   \   000094   ........     CALLA   #iot_command_buffer
+    122          
+    123          
+    124          
+    125          		drive_state_machine();
+   \   000098   ........     CALLA   #drive_state_machine
+    126          		display_state_machine();
+   \   00009C   ........     CALLA   #display_state_machine
+    127          		Display();
+   \   0000A0   ........     CALLA   #Display
+   \   0000A4   F13F         JMP     ??main_0
+   \   0000A6   0343         NOP
+   \   0000A8                REQUIRE _A_PM5CTL0_L
+   \   0000A8                REQUIRE _A_TB0CCTL0_L
+    128          		//------------------------------------------------------------------------------
+    129          	}
+    130          }
+    131          
+
+   \                                 In  segment CODE, align 2
+    132          void INTtoBCD(int hex_value) {
+   \                     INTtoBCD:
+    133          	int value = RESET_STATE;
+   \   000000   0F43         MOV.W   #0x0, R15
+    134          	int_char[0] = '0';
+   \   000002   F2403000.... MOV.B   #0x30, &int_char
+    135          	int_char[1] = '0';
+   \   000008   F2403000.... MOV.B   #0x30, &int_char + 1
+    136          	int_char[2] = '0';
+   \   00000E   F2403000.... MOV.B   #0x30, &int_char + 2
+    137          	int_char[3] = '0';
+   \   000014   F2403000.... MOV.B   #0x30, &int_char + 3
+    138          	while (hex_value > 999) {
+   \                     ??INTtoBCD_0:
+   \   00001A   3C90E803     CMP.W   #0x3e8, R12
+   \   00001E   0C38         JL      ??INTtoBCD_3
+    139          		hex_value = hex_value - 1000;
+   \   000020   3C5018FC     ADD.W   #0xfc18, R12
+    140          		value = value + 1;
+   \   000024   1F53         ADD.W   #0x1, R15
+    141          		int_char[0] = 0x30 + value;
+   \   000026   0E12         PUSH.W  R14
+   \   000028   C14F0000     MOV.B   R15, 0(SP)
+   \   00002C   3E41         POP.W   R14
+   \   00002E   7E503000     ADD.B   #0x30, R14
+   \   000032   C24E....     MOV.B   R14, &int_char
+   \   000036   F13F         JMP     ??INTtoBCD_0
+    142          	}
+    143          	value = RESET_STATE;
+   \                     ??INTtoBCD_3:
+   \   000038   0F43         MOV.W   #0x0, R15
+    144          	while (hex_value > 99) {
+   \                     ??INTtoBCD_1:
+   \   00003A   3C906400     CMP.W   #0x64, R12
+   \   00003E   0C38         JL      ??INTtoBCD_4
+    145          		hex_value = hex_value - 100;
+   \   000040   3C509CFF     ADD.W   #0xff9c, R12
+    146          		value = value + 1;
+   \   000044   1F53         ADD.W   #0x1, R15
+    147          		int_char[1] = 0x30 + value;
+   \   000046   0E12         PUSH.W  R14
+   \   000048   C14F0000     MOV.B   R15, 0(SP)
+   \   00004C   3E41         POP.W   R14
+   \   00004E   7E503000     ADD.B   #0x30, R14
+   \   000052   C24E....     MOV.B   R14, &int_char + 1
+   \   000056   F13F         JMP     ??INTtoBCD_1
+    148          	}
+    149          	value = RESET_STATE;
+   \                     ??INTtoBCD_4:
+   \   000058   0F43         MOV.W   #0x0, R15
+    150          	while (hex_value > 9) {
+   \                     ??INTtoBCD_2:
+   \   00005A   3C900A00     CMP.W   #0xa, R12
+   \   00005E   0C38         JL      ??INTtoBCD_5
+    151          		hex_value = hex_value - 10;
+   \   000060   3C50F6FF     ADD.W   #0xfff6, R12
+    152          		value = value + 1;
+   \   000064   1F53         ADD.W   #0x1, R15
+    153          		int_char[2] = 0x30 + value;
+   \   000066   0E12         PUSH.W  R14
+   \   000068   C14F0000     MOV.B   R15, 0(SP)
+   \   00006C   3E41         POP.W   R14
+   \   00006E   7E503000     ADD.B   #0x30, R14
+   \   000072   C24E....     MOV.B   R14, &int_char + 2
+   \   000076   F13F         JMP     ??INTtoBCD_2
+    154          	}
+    155          	int_char[3] = 0x30 + hex_value;
+   \                     ??INTtoBCD_5:
+   \   000078   0E12         PUSH.W  R14
+   \   00007A   C14C0000     MOV.B   R12, 0(SP)
+   \   00007E   3E41         POP.W   R14
+   \   000080   7E503000     ADD.B   #0x30, R14
+   \   000084   C24E....     MOV.B   R14, &int_char + 3
+    156          
+    157          }
+   \   000088   1001         RETA
+
+   \                                 In  segment CODE, align 2
+    158          void get_course_timer_info(void) {
+   \                     get_course_timer_info:
+    159          
+    160          
+    161          	INTtoBCD(course_timer_ones_count);
+   \   000000   1C42....     MOV.W   &course_timer_ones_count, R12
+   \   000004   ........     CALLA   #INTtoBCD
+    162          	for (int i = 5; i < 8; i++) {
+   \   000008   3F400500     MOV.W   #0x5, R15
+   \                     ??get_course_timer_info_0:
+   \   00000C   3F92         CMP.W   #0x8, R15
+   \   00000E   0534         JGE     ??get_course_timer_info_1
+    163          		course_timer_display[i] = int_char[i - 4];
+   \   000010   DF4F........ MOV.B   LWRD(int_char + 65532)(R15), course_timer_display(R15)
+    164          	}
+   \   000016   1F53         ADD.W   #0x1, R15
+   \   000018   F93F         JMP     ??get_course_timer_info_0
+    165          	course_timer_display[9] = course_timer_decimal_count + 0x30;
+   \                     ??get_course_timer_info_1:
+   \   00001A   1E42....     MOV.W   &course_timer_decimal_count, R14
+   \   00001E   7E503000     ADD.B   #0x30, R14
+   \   000022   C24E....     MOV.B   R14, &course_timer_display + 9
+    166          
+    167          
+    168          }
+   \   000026   1001         RETA
+    169          
+
+   \                                 In  segment CODE, align 2
+    170          void Display(void) {
+   \                     Display:
+    171          	if (update_display) {
+   \   000000   C293....     CMP.B   #0x0, &update_display
+   \   000004   0824         JEQ     ??Display_0
+    172          		update_display = RESET_STATE;
+   \   000006   C243....     MOV.B   #0x0, &update_display
+    173          		Display_Update(0, 0, 0, 0);
+   \   00000A   4F43         MOV.B   #0x0, R15
+   \   00000C   4E43         MOV.B   #0x0, R14
+   \   00000E   4D43         MOV.B   #0x0, R13
+   \   000010   4C43         MOV.B   #0x0, R12
+   \   000012   ........     CALLA   #Display_Update
+    174          	}
+    175          }
+   \                     ??Display_0:
+   \   000016   1001         RETA
+
+   \                                 In  segment CODE, align 2
+    176          void drive_state_machine(void) {
+   \                     drive_state_machine:
+    177          	switch (drive_state) {
+   \   000000   5E42....     MOV.B   &drive_state, R14
+   \   000004   7E804200     SUB.B   #0x42, R14
+   \   000008   2624         JEQ     ??drive_state_machine_1
+   \   00000A   6E82         SUB.B   #0x4, R14
+   \   00000C   1A24         JEQ     ??drive_state_machine_2
+   \   00000E   7E800600     SUB.B   #0x6, R14
+   \   000012   2724         JEQ     ??drive_state_machine_3
+   \   000014   5E83         SUB.B   #0x1, R14
+   \   000016   4B24         JEQ     ??drive_state_machine_4
+   \   000018   5E83         SUB.B   #0x1, R14
+   \   00001A   0D24         JEQ     ??drive_state_machine_5
+   \   00001C   6E82         SUB.B   #0x4, R14
+   \   00001E   3724         JEQ     ??drive_state_machine_6
+   \   000020   5E83         SUB.B   #0x1, R14
+   \   000022   3F24         JEQ     ??drive_state_machine_7
+   \   000024   6E82         SUB.B   #0x4, R14
+   \   000026   4824         JEQ     ??drive_state_machine_8
+   \   000028   7E801500     SUB.B   #0x15, R14
+   \   00002C   2424         JEQ     ??drive_state_machine_9
+   \   00002E   7E800600     SUB.B   #0x6, R14
+   \   000032   2724         JEQ     ??drive_state_machine_10
+   \   000034   1001         RETA
+    178          	case NONE:
+    179          		motorsOff();
+   \                     ??drive_state_machine_5:
+   \   000036   ........     CALLA   #motorsOff
+    180          		drive_state = WAIT;
+   \   00003A   F2405700.... MOV.B   #0x57, &drive_state
+    181          		break;
+   \   000040   1001         RETA
+    182          	case 'F':
+    183          		turnLeft(20000, 21000);
+   \                     ??drive_state_machine_2:
+   \   000042   3D400852     MOV.W   #0x5208, R13
+   \   000046   3C40204E     MOV.W   #0x4e20, R12
+   \   00004A   ........     CALLA   #turnLeft
+    184          		drive_state = WAIT;
+   \   00004E   F2405700.... MOV.B   #0x57, &drive_state
+    185          		break;
+   \   000054   1001         RETA
+    186          	case 'B':
+    187          		driveReverse();
+   \                     ??drive_state_machine_1:
+   \   000056   ........     CALLA   #driveReverse
+    188          		drive_state = WAIT;
+   \   00005A   F2405700.... MOV.B   #0x57, &drive_state
+    189          		break;
+   \   000060   1001         RETA
+    190          	case 'L':
+    191          		turnLeft(29000, 11000);
+   \                     ??drive_state_machine_3:
+   \   000062   3D40F82A     MOV.W   #0x2af8, R13
+   \   000066   3C404871     MOV.W   #0x7148, R12
+   \   00006A   ........     CALLA   #turnLeft
+    192          		drive_state = WAIT;
+   \   00006E   F2405700.... MOV.B   #0x57, &drive_state
+    193          		break;
+   \   000074   1001         RETA
+    194          
+    195          	case 'l':
+    196          		spinLeft();
+   \                     ??drive_state_machine_9:
+   \   000076   ........     CALLA   #spinLeft
+    197          		drive_state = WAIT;
+   \   00007A   F2405700.... MOV.B   #0x57, &drive_state
+    198          		break;
+   \   000080   1001         RETA
+    199          
+    200          	case 'r':
+    201          		spinRight();
+   \                     ??drive_state_machine_10:
+   \   000082   ........     CALLA   #spinRight
+    202          		drive_state = WAIT;
+   \   000086   F2405700.... MOV.B   #0x57, &drive_state
+    203          		break;
+   \   00008C   1001         RETA
+    204          
+    205          	case 'R':
+    206          		turnRight(31000, 11000);
+   \                     ??drive_state_machine_6:
+   \   00008E   3D40F82A     MOV.W   #0x2af8, R13
+   \   000092   3C401879     MOV.W   #0x7918, R12
+   \   000096   ........     CALLA   #turnRight
+    207          		drive_state = WAIT;
+   \   00009A   F2405700.... MOV.B   #0x57, &drive_state
+    208          		break;
+   \   0000A0   1001         RETA
+    209          	case 'S':
+    210          		motorsOff();
+   \                     ??drive_state_machine_7:
+   \   0000A2   ........     CALLA   #motorsOff
+    211          		drive_state = WAIT;
+   \   0000A6   F2405700.... MOV.B   #0x57, &drive_state
+    212          		break;
+   \   0000AC   1001         RETA
+    213          	case 'M':
+    214          		motorsOff();
+   \                     ??drive_state_machine_4:
+   \   0000AE   ........     CALLA   #motorsOff
+    215          		drive_state = WAIT;
+   \   0000B2   F2405700.... MOV.B   #0x57, &drive_state
+    216          		break;
+    217          	case WAIT:
+    218          		break;
+    219          	default: break;
+    220          	}
+    221          }
+   \                     ??drive_state_machine_8:
+   \   0000B8   1001         RETA
+    222          
+
+   \                                 In  segment CODE, align 2
+    223          void display_state_machine(void) {
+   \                     display_state_machine:
+    224          	switch (display_state) {
+   \   000000   5E42....     MOV.B   &display_state, R14
+   \   000004   7E804100     SUB.B   #0x41, R14
+   \   000008   2325         JEQ     ??display_state_machine_6
+   \   00000A   6E83         SUB.B   #0x2, R14
+   \   00000C   5124         JEQ     ??display_state_machine_7
+   \   00000E   7E800600     SUB.B   #0x6, R14
+   \   000012   E124         JEQ     ??display_state_machine_8
+   \   000014   7E800500     SUB.B   #0x5, R14
+   \   000018   0C24         JEQ     ??display_state_machine_9
+   \   00001A   6E83         SUB.B   #0x2, R14
+   \   00001C   3725         JEQ     ??display_state_machine_10
+   \   00001E   7E800700     SUB.B   #0x7, R14
+   \   000022   5125         JEQ     ??display_state_machine_11
+   \   000024   7E801700     SUB.B   #0x17, R14
+   \   000028   9124         JEQ     ??display_state_machine_12
+   \   00002A   7E800900     SUB.B   #0x9, R14
+   \   00002E   B324         JEQ     ??display_state_machine_13
+   \   000030   1001         RETA
+    225          	case NONE:
+    226          		if (speed == BR_SPEED_0) {
+   \                     ??display_state_machine_9:
+   \   000032   F2903000.... CMP.B   #0x30, &speed
+   \   000038   1B20         JNE     ??display_state_machine_14
+    227          			strcpy(display_line[0], " Waiting  ");
+   \   00003A   3D40....     MOV.W   #`?<Constant " Waiting  ">`, R13
+   \   00003E   3C40....     MOV.W   #display_line, R12
+   \   000042   ........     CALLA   #strcpy
+    228          			strcpy(display_line[1], "   For    ");
+   \   000046   3D40....     MOV.W   #`?<Constant "   For    ">`, R13
+   \   00004A   3C40....     MOV.W   #display_line + 11, R12
+   \   00004E   ........     CALLA   #strcpy
+    229          			strcpy(display_line[2], "IP Address");
+   \   000052   3D40....     MOV.W   #`?<Constant "IP Address">`, R13
+   \   000056   3C40....     MOV.W   #display_line + 22, R12
+   \   00005A   ........     CALLA   #strcpy
+    230          			strcpy(display_line[3], "          ");
+   \   00005E   3D40....     MOV.W   #`?<Constant "          ">`, R13
+   \   000062   3C40....     MOV.W   #display_line + 33, R12
+   \   000066   ........     CALLA   #strcpy
+    231          			display_changed = TRUE;
+   \   00006A   D243....     MOV.B   #0x1, &display_changed
+   \   00006E   1A3C         JMP     ??display_state_machine_4
+    232          		}
+    233          		else {
+    234          
+    235          			strcpy(display_line[0], " Waiting  ");
+   \                     ??display_state_machine_14:
+   \   000070   3D40....     MOV.W   #`?<Constant " Waiting  ">`, R13
+   \   000074   3C40....     MOV.W   #display_line, R12
+   \   000078   ........     CALLA   #strcpy
+    236          			strcpy(display_line[1], "   For    ");
+   \   00007C   3D40....     MOV.W   #`?<Constant "   For    ">`, R13
+   \   000080   3C40....     MOV.W   #display_line + 11, R12
+   \   000084   ........     CALLA   #strcpy
+    237          			strcpy(display_line[2], "IP Address");
+   \   000088   3D40....     MOV.W   #`?<Constant "IP Address">`, R13
+   \   00008C   3C40....     MOV.W   #display_line + 22, R12
+   \   000090   ........     CALLA   #strcpy
+    238          			strcpy(display_line[3], "          ");
+   \   000094   3D40....     MOV.W   #`?<Constant "          ">`, R13
+   \   000098   3C40....     MOV.W   #display_line + 33, R12
+   \   00009C   ........     CALLA   #strcpy
+    239          			display_changed = TRUE;
+   \   0000A0   D243....     MOV.B   #0x1, &display_changed
+    240          
+    241          		}
+    242          		display_state = DISPLAY_WAIT_4_CHANGE;
+   \                     ??display_state_machine_4:
+   \   0000A4   F2405700.... MOV.B   #0x57, &display_state
+    243          		display_changed = TRUE;
+   \   0000AA   D243....     MOV.B   #0x1, &display_changed
+    244          		break;
+   \   0000AE   1001         RETA
+    245          	case IOT_COMMAND_DISPLAY:
+    246          		get_course_timer_info();
+   \                     ??display_state_machine_7:
+   \   0000B0   ........     CALLA   #get_course_timer_info
+    247          		if (marker_found) {
+   \   0000B4   C293....     CMP.B   #0x0, &marker_found
+   \   0000B8   2624         JEQ     ??display_state_machine_15
+    248          			marker_display[9] = marker_count + 0x30;
+   \   0000BA   5E42....     MOV.B   &marker_count, R14
+   \   0000BE   7E503000     ADD.B   #0x30, R14
+   \   0000C2   C24E....     MOV.B   R14, &marker_display + 9
+    249          			lcd_4line();
+   \   0000C6   ........     CALLA   #lcd_4line
+    250          			strcpy(display_line[0], marker_display);
+   \   0000CA   3D40....     MOV.W   #marker_display, R13
+   \   0000CE   3C40....     MOV.W   #display_line, R12
+   \   0000D2   ........     CALLA   #strcpy
+    251          			strcpy(display_line[1], display_2);
+   \   0000D6   3D40....     MOV.W   #display_2, R13
+   \   0000DA   3C40....     MOV.W   #display_line + 11, R12
+   \   0000DE   ........     CALLA   #strcpy
+    252          			strcpy(display_line[2], display_3);
+   \   0000E2   3D40....     MOV.W   #display_3, R13
+   \   0000E6   3C40....     MOV.W   #display_line + 22, R12
+   \   0000EA   ........     CALLA   #strcpy
+    253          			strcpy(display_line[3], course_timer_display);
+   \   0000EE   3D40....     MOV.W   #course_timer_display, R13
+   \   0000F2   3C40....     MOV.W   #display_line + 33, R12
+   \   0000F6   ........     CALLA   #strcpy
+    254          			display_state = DISPLAY_WAIT_4_CHANGE;
+   \   0000FA   F2405700.... MOV.B   #0x57, &display_state
+    255          			display_changed = TRUE;
+   \   000100   D243....     MOV.B   #0x1, &display_changed
+   \   000104   1F3C         JMP     ??display_state_machine_5
+    256          		
+    257          		}
+    258          		else {
+    259          			lcd_BIG_mid();
+   \                     ??display_state_machine_15:
+   \   000106   ........     CALLA   #lcd_BIG_mid
+    260          			strcpy(display_line[0], " Command: ");
+   \   00010A   3D40....     MOV.W   #`?<Constant " Command: ">`, R13
+   \   00010E   3C40....     MOV.W   #display_line, R12
+   \   000112   ........     CALLA   #strcpy
+    261          			strcpy(display_line[1], iot_command_display);
+   \   000116   3D40....     MOV.W   #iot_command_display, R13
+   \   00011A   3C40....     MOV.W   #display_line + 11, R12
+   \   00011E   ........     CALLA   #strcpy
+    262          			strcpy(display_line[2], course_timer_display);
+   \   000122   3D40....     MOV.W   #course_timer_display, R13
+   \   000126   3C40....     MOV.W   #display_line + 22, R12
+   \   00012A   ........     CALLA   #strcpy
+    263          			strcpy(display_line[3], "          ");
+   \   00012E   3D40....     MOV.W   #`?<Constant "          ">`, R13
+   \   000132   3C40....     MOV.W   #display_line + 33, R12
+   \   000136   ........     CALLA   #strcpy
+    264          			display_state = DISPLAY_WAIT_4_CHANGE;
+   \   00013A   F2405700.... MOV.B   #0x57, &display_state
+    265          			display_changed = TRUE;
+   \   000140   D243....     MOV.B   #0x1, &display_changed
+    266          		}
+    267          		old_display_state = IOT_COMMAND_DISPLAY;
+   \                     ??display_state_machine_5:
+   \   000144   F2404300.... MOV.B   #0x43, &old_display_state
+    268          
+    269          		break;
+   \   00014A   1001         RETA
+    270          
+    271          	case COURSE_COMMANDS_INACTIVE:
+    272          		lcd_4line();
+   \                     ??display_state_machine_12:
+   \   00014C   ........     CALLA   #lcd_4line
+    273          		get_course_timer_info();
+   \   000150   ........     CALLA   #get_course_timer_info
+    274          		strcpy(display_line[0], " Waiting  ");
+   \   000154   3D40....     MOV.W   #`?<Constant " Waiting  ">`, R13
+   \   000158   3C40....     MOV.W   #display_line, R12
+   \   00015C   ........     CALLA   #strcpy
+    275          		strcpy(display_line[1], display_2);
+   \   000160   3D40....     MOV.W   #display_2, R13
+   \   000164   3C40....     MOV.W   #display_line + 11, R12
+   \   000168   ........     CALLA   #strcpy
+    276          		strcpy(display_line[2], display_3);
+   \   00016C   3D40....     MOV.W   #display_3, R13
+   \   000170   3C40....     MOV.W   #display_line + 22, R12
+   \   000174   ........     CALLA   #strcpy
+    277          		strcpy(display_line[3], course_timer_display);
+   \   000178   3D40....     MOV.W   #course_timer_display, R13
+   \   00017C   3C40....     MOV.W   #display_line + 33, R12
+   \   000180   ........     CALLA   #strcpy
+    278          		display_state = DISPLAY_WAIT_4_CHANGE;
+   \   000184   F2405700.... MOV.B   #0x57, &display_state
+    279          		old_display_state = COURSE_COMMANDS_INACTIVE;
+   \   00018A   F2406E00.... MOV.B   #0x6e, &old_display_state
+    280          		display_changed = TRUE;
+   \   000190   D243....     MOV.B   #0x1, &display_changed
+    281          		break;
+   \   000194   1001         RETA
+    282          
+    283          	case WAITING_FOR_INPUT:
+    284          		lcd_4line();
+   \                     ??display_state_machine_13:
+   \   000196   ........     CALLA   #lcd_4line
+    285          		strcpy(display_line[0], " Waiting  ");
+   \   00019A   3D40....     MOV.W   #`?<Constant " Waiting  ">`, R13
+   \   00019E   3C40....     MOV.W   #display_line, R12
+   \   0001A2   ........     CALLA   #strcpy
+    286          		strcpy(display_line[1], "   For    ");
+   \   0001A6   3D40....     MOV.W   #`?<Constant "   For    ">`, R13
+   \   0001AA   3C40....     MOV.W   #display_line + 11, R12
+   \   0001AE   ........     CALLA   #strcpy
+    287          		strcpy(display_line[2], "  Input   ");
+   \   0001B2   3D40....     MOV.W   #`?<Constant "  Input   ">`, R13
+   \   0001B6   3C40....     MOV.W   #display_line + 22, R12
+   \   0001BA   ........     CALLA   #strcpy
+    288          		strcpy(display_line[3], "          ");
+   \   0001BE   3D40....     MOV.W   #`?<Constant "          ">`, R13
+   \   0001C2   3C40....     MOV.W   #display_line + 33, R12
+   \   0001C6   ........     CALLA   #strcpy
+    289          		display_state = DISPLAY_WAIT_4_CHANGE;
+   \   0001CA   F2405700.... MOV.B   #0x57, &display_state
+    290          		display_changed = TRUE;
+   \   0001D0   D243....     MOV.B   #0x1, &display_changed
+    291          
+    292          		break;
+   \   0001D4   1001         RETA
+    293          	
+    294          	case IP_SSID_DISPLAY:
+    295          		lcd_4line();
+   \                     ??display_state_machine_8:
+   \   0001D6   ........     CALLA   #lcd_4line
+    296          		for (int i = 0; i < DISPLAY_LENGTH; i++) {
+   \   0001DA   0F43         MOV.W   #0x0, R15
+   \                     ??display_state_machine_0:
+   \   0001DC   3F900A00     CMP.W   #0xa, R15
+   \   0001E0   0534         JGE     ??display_state_machine_16
+    297          			display_0[i] = SSID[i];
+   \   0001E2   DF4F........ MOV.B   SSID(R15), display_0(R15)
+    298          		}
+   \   0001E8   1F53         ADD.W   #0x1, R15
+   \   0001EA   F83F         JMP     ??display_state_machine_0
+    299          		for (int i = 1; i < 8; i++) {
+   \                     ??display_state_machine_16:
+   \   0001EC   1F43         MOV.W   #0x1, R15
+   \                     ??display_state_machine_1:
+   \   0001EE   3F92         CMP.W   #0x8, R15
+   \   0001F0   0534         JGE     ??display_state_machine_17
+    300          			display_2[i] = IP_address[i - 1];
+   \   0001F2   DF4F........ MOV.B   LWRD(IP_address + 65535)(R15), display_2(R15)
+    301          		}
+   \   0001F8   1F53         ADD.W   #0x1, R15
+   \   0001FA   F93F         JMP     ??display_state_machine_1
+    302          		for (int i = 2; i < 7; i++) {
+   \                     ??display_state_machine_17:
+   \   0001FC   2F43         MOV.W   #0x2, R15
+   \                     ??display_state_machine_2:
+   \   0001FE   3F900700     CMP.W   #0x7, R15
+   \   000202   0534         JGE     ??display_state_machine_18
+    303          			display_3[i] = IP_address[i + 6];
+   \   000204   DF4F........ MOV.B   IP_address + 6(R15), display_3(R15)
+    304          		}
+   \   00020A   1F53         ADD.W   #0x1, R15
+   \   00020C   F83F         JMP     ??display_state_machine_2
+    305          		strcpy(display_line[0], display_0);
+   \                     ??display_state_machine_18:
+   \   00020E   3D40....     MOV.W   #display_0, R13
+   \   000212   3C40....     MOV.W   #display_line, R12
+   \   000216   ........     CALLA   #strcpy
+    306          		strcpy(display_line[1], "IP address");
+   \   00021A   3D40....     MOV.W   #`?<Constant "IP address">`, R13
+   \   00021E   3C40....     MOV.W   #display_line + 11, R12
+   \   000222   ........     CALLA   #strcpy
+    307          		strcpy(display_line[2], display_2);
+   \   000226   3D40....     MOV.W   #display_2, R13
+   \   00022A   3C40....     MOV.W   #display_line + 22, R12
+   \   00022E   ........     CALLA   #strcpy
+    308          		strcpy(display_line[3], display_3);
+   \   000232   3D40....     MOV.W   #display_3, R13
+   \   000236   3C40....     MOV.W   #display_line + 33, R12
+   \   00023A   ........     CALLA   #strcpy
+    309          		display_changed = TRUE;
+   \   00023E   D243....     MOV.B   #0x1, &display_changed
+    310          		old_display_state = IP_SSID_DISPLAY;
+   \   000242   F2404900.... MOV.B   #0x49, &old_display_state
+    311          		display_state = DISPLAY_WAIT_4_CHANGE;
+   \   000248   F2405700.... MOV.B   #0x57, &display_state
+    312          		break;
+   \   00024E   1001         RETA
+    313          	case AT_COMMAND:
+    314          		strcpy(display_line[0], " COMMAND: ");
+   \                     ??display_state_machine_6:
+   \   000250   3D40....     MOV.W   #`?<Constant " COMMAND: ">`, R13
+   \   000254   3C40....     MOV.W   #display_line, R12
+   \   000258   ........     CALLA   #strcpy
+    315          		strcpy(display_line[1], "    1/2   ");
+   \   00025C   3D40....     MOV.W   #`?<Constant "    1/2   ">`, R13
+   \   000260   3C40....     MOV.W   #display_line + 11, R12
+   \   000264   ........     CALLA   #strcpy
+    316          		strcpy(display_line[2], "    AT    ");
+   \   000268   3D40....     MOV.W   #`?<Constant "    AT    ">`, R13
+   \   00026C   3C40....     MOV.W   #display_line + 22, R12
+   \   000270   ........     CALLA   #strcpy
+    317          		strcpy(display_line[3], "          ");
+   \   000274   3D40....     MOV.W   #`?<Constant "          ">`, R13
+   \   000278   3C40....     MOV.W   #display_line + 33, R12
+   \   00027C   ........     CALLA   #strcpy
+    318          		display_changed = TRUE;
+   \   000280   D243....     MOV.B   #0x1, &display_changed
+    319          		display_state = DISPLAY_WAIT_4_CHANGE;
+   \   000284   F2405700.... MOV.B   #0x57, &display_state
+    320          		break;
+   \   00028A   1001         RETA
+    321          
+    322          	case AT_NSTCP_COMMAND:
+    323          		strcpy(display_line[0], " COMMAND: ");
+   \                     ??display_state_machine_10:
+   \   00028C   3D40....     MOV.W   #`?<Constant " COMMAND: ">`, R13
+   \   000290   3C40....     MOV.W   #display_line, R12
+   \   000294   ........     CALLA   #strcpy
+    324          		strcpy(display_line[1], "    2/2   ");
+   \   000298   3D40....     MOV.W   #`?<Constant "    2/2   ">`, R13
+   \   00029C   3C40....     MOV.W   #display_line + 11, R12
+   \   0002A0   ........     CALLA   #strcpy
+    325          		strcpy(display_line[2], "AT+NSTCP= ");
+   \   0002A4   3D40....     MOV.W   #`?<Constant "AT+NSTCP= ">`, R13
+   \   0002A8   3C40....     MOV.W   #display_line + 22, R12
+   \   0002AC   ........     CALLA   #strcpy
+    326          		strcpy(display_line[3], " 65001,1  ");
+   \   0002B0   3D40....     MOV.W   #`?<Constant " 65001,1  ">`, R13
+   \   0002B4   3C40....     MOV.W   #display_line + 33, R12
+   \   0002B8   ........     CALLA   #strcpy
+    327          		display_changed = TRUE;
+   \   0002BC   D243....     MOV.B   #0x1, &display_changed
+    328          		display_state = DISPLAY_WAIT_4_CHANGE;
+   \   0002C0   F2405700.... MOV.B   #0x57, &display_state
+    329          		break;
+    330          
+    331          	case DISPLAY_WAIT_4_CHANGE:
+    332          		break;
+    333          
+    334          
+    335          	default:
+    336          		break;
+    337          
+    338          
+    339          
+    340          	}
+    341          }
+   \                     ??display_state_machine_11:
+   \   0002C6   1001         RETA
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for drive_state>`:
+   \   000000   4E           DC8 78
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for iot_command_display>`:
+   \   000000   202020202020 DC8 "          "
+   \            2020202000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for BR_0>`:
+   \   000000   203131352C32 DC8 " 115,200  "
+   \            3030202000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for BR_1>`:
+   \   000000   203436302C38 DC8 " 460,800  "
+   \            3030202000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for course_timer_display>`:
+   \   000000   54696D652030 DC8 "Time 000.0"
+   \            30302E3000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for marker_display>`:
+   \   000000   417272697665 DC8 "Arrived:  "
+   \            643A202000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for display_0>`:
+   \   000000   202020202020 DC8 "          "
+   \            2020202000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for display_1>`:
+   \   000000   202020202020 DC8 "          "
+   \            2020202000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for display_2>`:
+   \   000000   202020202020 DC8 "          "
+   \            2020202000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for display_3>`:
+   \   000000   202020202020 DC8 "          "
+   \            2020202000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for display_out>`:
+   \   000000   202020202020 DC8 "          "
+   \            2020202000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for display_state>`:
+   \   000000   4E           DC8 78
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for old_display_state>`:
+   \   000000   4E           DC8 78
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant " ECE-306  ">`:
+   \   000000   204543452D33 DC8 " ECE-306  "
+   \            3036202000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant " Voltages ">`:
+   \   000000   20566F6C7461 DC8 " Voltages "
+   \            6765732000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "BAT   CONV">`:
+   \   000000   424154202020 DC8 "BAT   CONV"
+   \            434F4E5600  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "L    R    ">`:
+   \   000000   4C2020202052 DC8 "L    R    "
+   \            2020202000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant " Waiting  ">`:
+   \   000000   205761697469 DC8 " Waiting  "
+   \            6E67202000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "   For    ">`:
+   \   000000   202020466F72 DC8 "   For    "
+   \            2020202000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "IP Address">`:
+   \   000000   495020416464 DC8 "IP Address"
+   \            7265737300  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "          ">`:
+   \   000000   202020202020 DC8 "          "
+   \            2020202000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant " Command: ">`:
+   \   000000   20436F6D6D61 DC8 " Command: "
+   \            6E643A2000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "  Input   ">`:
+   \   000000   2020496E7075 DC8 "  Input   "
+   \            7420202000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "IP address">`:
+   \   000000   495020616464 DC8 "IP address"
+   \            7265737300  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant " COMMAND: ">`:
+   \   000000   20434F4D4D41 DC8 " COMMAND: "
+   \            4E443A2000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "    1/2   ">`:
+   \   000000   20202020312F DC8 "    1/2   "
+   \            3220202000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "    AT    ">`:
+   \   000000   202020204154 DC8 "    AT    "
+   \            2020202000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "    2/2   ">`:
+   \   000000   20202020322F DC8 "    2/2   "
+   \            3220202000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "AT+NSTCP= ">`:
+   \   000000   41542B4E5354 DC8 "AT+NSTCP= "
+   \            43503D2000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant " 65001,1  ">`:
+   \   000000   203635303031 DC8 " 65001,1  "
+   \            2C31202000  
+    342          
+    343          
+    344          
+    345          
+    346          
+
+   Maximum stack usage in bytes:
+
+   CSTACK Function
+   ------ --------
+      4   Display
+        4   -> Display_Update
+      6   INTtoBCD
+      4   display_state_machine
+        4   -> get_course_timer_info
+        4   -> lcd_4line
+        4   -> lcd_BIG_mid
+        4   -> strcpy
+      4   drive_state_machine
+        4   -> driveReverse
+        4   -> motorsOff
+        4   -> spinLeft
+        4   -> spinRight
+        4   -> turnLeft
+        4   -> turnRight
+      4   get_course_timer_info
+        4   -> INTtoBCD
+      4   main
+        4   -> Display
+        4   -> Init_ADC
+        4   -> Init_Clocks
+        4   -> Init_Conditions
+        4   -> Init_DAC
+        4   -> Init_LCD
+        4   -> Init_Ports
+        4   -> Init_Serial
+        4   -> Init_Timers
+        4   -> carrot_command_buffer
+        4   -> display_state_machine
+        4   -> drive_state_machine
+        4   -> iot_command_buffer
+        4   -> menu
+        4   -> strcpy
+        4   -> transmit_2_iot
+        4   -> update_string
+
+
+   Segment part sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      11  ?<Constant "          ">
+      11  ?<Constant "    1/2   ">
+      11  ?<Constant "    2/2   ">
+      11  ?<Constant "    AT    ">
+      11  ?<Constant "   For    ">
+      11  ?<Constant "  Input   ">
+      11  ?<Constant " 65001,1  ">
+      11  ?<Constant " COMMAND: ">
+      11  ?<Constant " Command: ">
+      11  ?<Constant " ECE-306  ">
+      11  ?<Constant " Voltages ">
+      11  ?<Constant " Waiting  ">
+      11  ?<Constant "AT+NSTCP= ">
+      11  ?<Constant "BAT   CONV">
+      11  ?<Constant "IP Address">
+      11  ?<Constant "IP address">
+      11  ?<Constant "L    R    ">
+      11  ?<Initializer for BR_0>
+      11  ?<Initializer for BR_1>
+      11  ?<Initializer for course_timer_display>
+      11  ?<Initializer for display_0>
+      11  ?<Initializer for display_1>
+      11  ?<Initializer for display_2>
+      11  ?<Initializer for display_3>
+      11  ?<Initializer for display_out>
+       1  ?<Initializer for display_state>
+       1  ?<Initializer for drive_state>
+      11  ?<Initializer for iot_command_display>
+      11  ?<Initializer for marker_display>
+       1  ?<Initializer for old_display_state>
+      11  BR_0
+      11  BR_1
+      24  Display
+     138  INTtoBCD
+       2  _A_PM5CTL0_L
+       2  _A_TB0CCTL0_L
+      11  course_timer_display
+       5  course_timer_ones_char
+      11  display_0
+      11  display_1
+      11  display_2
+      11  display_3
+       1  display_adc
+       1  display_mode
+      11  display_out
+       1  display_state
+     712  display_state_machine
+       1  drive_state
+     186  drive_state_machine
+       1  emitter_state
+      40  get_course_timer_info
+       5  int_char
+      11  iot_command_display
+     168  main
+      11  marker_display
+       1  old_display_state
+       1  slow_input_down
+       2  wheel_run
+
+ 
+ 1 268 bytes in segment CODE
+     4 bytes in segment DATA16_AN
+   187 bytes in segment DATA16_C
+   113 bytes in segment DATA16_I
+   113 bytes in segment DATA16_ID
+    16 bytes in segment DATA16_Z
+ 
+ 1 268 bytes of CODE  memory
+   300 bytes of CONST memory
+   129 bytes of DATA  memory (+ 4 bytes shared)
+
+Errors: none
+Warnings: none

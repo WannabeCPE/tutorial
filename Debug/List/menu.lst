@@ -1,0 +1,176 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V7.20.1.997/W32 for MSP430           09/Dec/2020  16:55:35
+# Copyright 1996-2020 IAR Systems AB.
+# PC-locked license - IAR Embedded Workbench for MSP430, 8K KickStart Edition 7.20
+#
+#    __rt_version  =  3
+#    __double_size =  32
+#    __reg_r4      =  free
+#    __reg_r5      =  free
+#    __pic         =  no
+#    __core        =  430X
+#    __data_model  =  small
+#    __code_model  =  large
+#    Source file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_09\menu.c
+#    Command line  =  
+#        -f C:\Users\19196\AppData\Local\Temp\EWC5CB.tmp
+#        ("C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_09\menu.c"
+#        -lC "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_09\Debug\List" -o
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_09\Debug\Obj" --no_cse --no_unroll --no_inline
+#        --no_code_motion --no_tbaa --debug -D__MSP430FR2355__ -e --double=32
+#        --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.4\430\lib\dlib\dl430xlsfn.h" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.4\430\" --core=430X --data_model=small
+#        -On --multiplier=32 --hw_workaround=CPU40 --code_model=large)
+#    Locale        =  English_USA.1252
+#    List file     =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_09\Debug\List\menu.lst
+#    Object file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_09\Debug\Obj\menu.r43
+#
+###############################################################################
+
+C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_09\menu.c
+      1          //------------------------------------------------------------------------------
+      2          //
+      3          //  Description: This file contains functions for the Menu System
+      4          //
+      5          //
+      6          //  Cody Lane
+      7          //  Nov 2020
+      8          //  Built with IAR Embedded Workbench Version: V7.20.1 
+      9          //------------------------------------------------------------------------------
+     10          
+     11          //------------------------------------------------------------------------------
+     12          #include  "msp430.h"
+     13          #include  "functions.h"
+     14          #include <string.h>
+     15          #include  "macros.h"
+     16          
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     17          volatile char main_menu_active = RESET_STATE;
+   \                     main_menu_active:
+   \   000000                DS8 1
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     18          volatile char main_menu_select = RESET_STATE;
+   \                     main_menu_select:
+   \   000000                DS8 1
+     19          extern volatile char send_nstcp;
+     20          extern volatile unsigned int ADC_Thumb;
+     21          extern volatile char display_state;
+     22          extern volatile char old_display_state;
+     23          
+     24          
+
+   \                                 In  segment CODE, align 2
+     25          void menu(void) {
+   \                     menu:
+     26          	if (main_menu_active) {
+   \   000000   C293....     CMP.B   #0x0, &main_menu_active
+   \   000004   1E24         JEQ     ??menu_1
+     27          		switch (ADC_Thumb>>9) {
+   \   000006   1E42....     MOV.W   &ADC_Thumb, R14
+   \   00000A   8E10         SWPB    R14
+   \   00000C   3EF0FF00     AND.W   #0xff, R14
+   \   000010   0E11         RRA.W   R14
+   \   000012   4E83         SUB.B   #0x0, R14
+   \   000014   0324         JEQ     ??menu_2
+   \   000016   5E83         SUB.B   #0x1, R14
+   \   000018   0524         JEQ     ??menu_3
+   \   00001A   073C         JMP     ??menu_0
+     28          		case 0:
+     29          			display_state = AT_COMMAND;
+   \                     ??menu_2:
+   \   00001C   F2404100.... MOV.B   #0x41, &display_state
+     30          			break;
+   \   000022   033C         JMP     ??menu_0
+     31          		case 1:
+     32          			display_state = AT_NSTCP_COMMAND;
+   \                     ??menu_3:
+   \   000024   F2405000.... MOV.B   #0x50, &display_state
+     33          			break;
+     34          		default: break;
+     35          		
+     36          		}
+     37          		if (main_menu_select) {
+   \                     ??menu_0:
+   \   00002A   C293....     CMP.B   #0x0, &main_menu_select
+   \   00002E   0924         JEQ     ??menu_1
+     38          			main_menu_sel();
+   \   000030   ........     CALLA   #main_menu_sel
+     39          			main_menu_select = RESET_STATE;
+   \   000034   C243....     MOV.B   #0x0, &main_menu_select
+     40          			display_state = old_display_state;
+   \   000038   D242........ MOV.B   &old_display_state, &display_state
+     41          			main_menu_active = FALSE;
+   \   00003E   C243....     MOV.B   #0x0, &main_menu_active
+     42          		}
+     43          	}
+     44          	
+     45          }
+   \                     ??menu_1:
+   \   000042   1001         RETA
+     46          
+
+   \                                 In  segment CODE, align 2
+     47          void main_menu_sel(void) {
+   \                     main_menu_sel:
+     48          	switch (ADC_Thumb >> 9) {
+   \   000000   1E42....     MOV.W   &ADC_Thumb, R14
+   \   000004   8E10         SWPB    R14
+   \   000006   3EF0FF00     AND.W   #0xff, R14
+   \   00000A   0E11         RRA.W   R14
+   \   00000C   4E83         SUB.B   #0x0, R14
+   \   00000E   0424         JEQ     ??main_menu_sel_0
+   \   000010   5E83         SUB.B   #0x1, R14
+   \   000012   0220         JNE     ??main_menu_sel_0
+     49          	case 0:
+     50          		break;
+     51          	case 1:
+     52          		send_nstcp = TRUE;
+   \   000014   D243....     MOV.B   #0x1, &send_nstcp
+     53          		break;
+     54          	default: break;
+     55          	}
+     56          
+     57          }
+   \                     ??main_menu_sel_0:
+   \   000018   1001         RETA
+
+   Maximum stack usage in bytes:
+
+   CSTACK Function
+   ------ --------
+      4   main_menu_sel
+      4   menu
+        4   -> main_menu_sel
+
+
+   Segment part sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       1  main_menu_active
+      26  main_menu_sel
+       1  main_menu_select
+      68  menu
+
+ 
+ 94 bytes in segment CODE
+  2 bytes in segment DATA16_Z
+ 
+ 94 bytes of CODE memory
+  2 bytes of DATA memory
+
+Errors: none
+Warnings: none

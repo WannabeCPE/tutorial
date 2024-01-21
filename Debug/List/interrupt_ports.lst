@@ -1,0 +1,427 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V7.20.1.997/W32 for MSP430           09/Dec/2020  18:44:20
+# Copyright 1996-2020 IAR Systems AB.
+# PC-locked license - IAR Embedded Workbench for MSP430, 8K KickStart Edition 7.20
+#
+#    __rt_version  =  3
+#    __double_size =  32
+#    __reg_r4      =  free
+#    __reg_r5      =  free
+#    __pic         =  no
+#    __core        =  430X
+#    __data_model  =  small
+#    __code_model  =  large
+#    Source file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_09\interrupt_ports.c
+#    Command line  =  
+#        -f C:\Users\19196\AppData\Local\Temp\EW589A.tmp
+#        ("C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_09\interrupt_ports.c" -lC
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_09\Debug\List" -o
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_09\Debug\Obj" --no_cse --no_unroll --no_inline
+#        --no_code_motion --no_tbaa --debug -D__MSP430FR2355__ -e --double=32
+#        --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.4\430\lib\dlib\dl430xlsfn.h" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.4\430\" --core=430X --data_model=small
+#        -On --multiplier=32 --hw_workaround=CPU40 --code_model=large)
+#    Locale        =  English_USA.1252
+#    List file     =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_09\Debug\List\interrupt_ports.lst
+#    Object file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_09\Debug\Obj\interrupt_ports.r43
+#
+###############################################################################
+
+C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_09\interrupt_ports.c
+      1          //------------------------------------------------------------------------------
+      2          //
+      3          //  Description: This file contains the Interrupt_Ports Routine 
+      4          //
+      5          //
+      6          //  Cody Lane
+      7          //  September 2020
+      8          //  Built with IAR Embedded Workbench Version: V7.20.1 
+      9          //------------------------------------------------------------------------------
+     10          
+     11          #include  "msp430.h"
+
+   \                                 In  segment DATA16_AN, at 0x700
+   \   union <unnamed> _A_ADCCTL0_L
+   \                     _A_ADCCTL0_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x70a
+   \   union <unnamed> _A_ADCMCTL0_L
+   \                     _A_ADCMCTL0_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x712
+   \   union <unnamed> _A_ADCMEM0_L
+   \                     _A_ADCMEM0_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x71e
+   \   union <unnamed> _A_ADCIV_L
+   \                     _A_ADCIV_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x21a
+   \   union <unnamed> _A_PAIE_L
+   \                     _A_PAIE_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x21c
+   \   union <unnamed> _A_PAIFG_L
+   \                     _A_PAIFG_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x23a
+   \   union <unnamed> _A_PBIE_L
+   \                     _A_PBIE_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x23c
+   \   union <unnamed> _A_PBIFG_L
+   \                     _A_PBIFG_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x382
+   \   union <unnamed> _A_TB0CCTL0_L
+   \                     _A_TB0CCTL0_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x384
+   \   union <unnamed> _A_TB0CCTL1_L
+   \                     _A_TB0CCTL1_L:
+   \   000000                DS8 2
+     12          #include  "functions.h"
+     13          #include <string.h>
+     14          #include  "macros.h"
+     15          //------------------------------------------------------------------------------
+     16          // Port 4 interrupt. For switches, they are disabled for the duration
+     17          // of the debounce timer. Flag is set that user space can check.
+     18          
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     19          extern unsigned int switch_one_debouncing = RESET_STATE;
+   \                     switch_one_debouncing:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     20          extern unsigned int switch_one_debounce_count = RESET_STATE;
+   \                     switch_one_debounce_count:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     21          unsigned int switch_one_press_count = RESET_STATE;
+   \                     switch_one_press_count:
+   \   000000                DS8 2
+     22          
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     23          extern unsigned int switch_two_debouncing = RESET_STATE;
+   \                     switch_two_debouncing:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     24          extern unsigned int switch_two_debounce_count = RESET_STATE;
+   \                     switch_two_debounce_count:
+   \   000000                DS8 2
+     25          
+     26          extern volatile unsigned char display_state;
+     27          extern volatile unsigned char display_changed;
+     28          
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     29          volatile unsigned int ADC_Channel = RESET_STATE;
+   \                     ADC_Channel:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     30          volatile unsigned int ADC_Thumb = RESET_STATE;
+   \                     ADC_Thumb:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     31          volatile unsigned int ADC_Left_Detect = RESET_STATE;
+   \                     ADC_Left_Detect:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     32          volatile unsigned int ADC_Right_Detect = RESET_STATE;
+   \                     ADC_Right_Detect:
+   \   000000                DS8 2
+     33          
+     34          
+     35          
+     36          
+     37          #pragma vector=PORT4_VECTOR
+
+   \                                 In  segment ISR_CODE, align 2
+     38          __interrupt void switchP4_interrupt(void) {
+   \                     switchP4_interrupt:
+     39          	// Switch 1
+     40          	if (P4IFG & SW1) {
+   \   000000   E2B33D02     BIT.B   #0x2, &0x23d
+   \   000004   0E28         JNC     ??switchP4_interrupt_0
+     41          		P4IFG &= ~SW1; // IFG SW1 cleared
+   \   000006   E2C33D02     BIC.B   #0x2, &0x23d
+     42          		TB0CCTL0 &= ~CCIE;
+   \   00000A   B2C010008203 BIC.W   #0x10, &0x382
+     43          		TB0CCTL1 |= CCIE;
+   \   000010   B2D010008403 BIS.W   #0x10, &0x384
+     44          		// Set a variable to identify the switch has been pressed.
+     45          		// Set a variable to identify the switch is being debounced.
+     46          		switch_one_debouncing = DEBOUNCING;
+   \   000016   9243....     MOV.W   #0x1, &switch_one_debouncing
+     47          		// Reset the count required of the debounce.
+     48          		switch_one_debounce_count = RESET_STATE;
+   \   00001A   8243....     MOV.W   #0x0, &switch_one_debounce_count
+     49          		// Disable the Switch Interrupt.
+     50          		P4IE &= ~SW1;
+   \   00001E   E2C33B02     BIC.B   #0x2, &0x23b
+     51          		
+     52          		
+     53          		
+     54          		
+     55          		// Clear any current timer interrupt.
+     56          	
+     57          	}
+     58          	// Use a Timer Value to control the debounce
+     59          }
+   \                     ??switchP4_interrupt_0:
+   \   000022   0013         RETI
+   \   000024                REQUIRE _A_PBIFG_L
+   \   000024                REQUIRE _A_TB0CCTL0_L
+   \   000024                REQUIRE _A_TB0CCTL1_L
+   \   000024                REQUIRE _A_PBIE_L
+     60          
+     61          #pragma vector=PORT2_VECTOR
+
+   \                                 In  segment ISR_CODE, align 2
+     62          __interrupt void switchP2_interrupt(void) {
+   \                     switchP2_interrupt:
+     63          	// Switch 2
+     64          	if (P2IFG & SW2) {
+   \   000000   F2B21D02     BIT.B   #0x8, &0x21d
+   \   000004   0E28         JNC     ??switchP2_interrupt_0
+     65          		P2IFG &= ~SW2; // IFG SW2 cleared
+   \   000006   F2C21D02     BIC.B   #0x8, &0x21d
+     66          		TB0CCTL0 &= ~CCIE;
+   \   00000A   B2C010008203 BIC.W   #0x10, &0x382
+     67          		TB0CCTL1 |= CCIE;
+   \   000010   B2D010008403 BIS.W   #0x10, &0x384
+     68          		switch_two_debouncing = DEBOUNCING;
+   \   000016   9243....     MOV.W   #0x1, &switch_two_debouncing
+     69          		switch_two_debounce_count = RESET_STATE;
+   \   00001A   8243....     MOV.W   #0x0, &switch_two_debounce_count
+     70          		P2IE &= ~SW2;
+   \   00001E   F2C21B02     BIC.B   #0x8, &0x21b
+     71          
+     72          	}
+     73          }
+   \                     ??switchP2_interrupt_0:
+   \   000022   0013         RETI
+   \   000024                REQUIRE _A_PAIFG_L
+   \   000024                REQUIRE _A_TB0CCTL0_L
+   \   000024                REQUIRE _A_TB0CCTL1_L
+   \   000024                REQUIRE _A_PAIE_L
+     74          
+     75          #pragma vector=ADC_VECTOR
+
+   \                                 In  segment ISR_CODE, align 2
+     76          __interrupt void ADC_ISR(void) {
+   \                     ADC_ISR:
+   \   000000   1F15         PUSHM.W #0x2, R15
+     77          	switch (__even_in_range(ADCIV, ADCIV_ADCIFG)) {
+   \   000002   1F421E07     MOV.W   &0x71e, R15
+   \   000006   E00F         ADDA    R15, PC
+   \                     `?<Jumptable for ADC_ISR>_0`:
+   \   000008   473C         JMP     ??ADC_ISR_1
+   \   00000A   463C         JMP     ??ADC_ISR_1
+   \   00000C   453C         JMP     ??ADC_ISR_1
+   \   00000E   443C         JMP     ??ADC_ISR_1
+   \   000010   433C         JMP     ??ADC_ISR_1
+   \   000012   423C         JMP     ??ADC_ISR_1
+   \   000014   003C         JMP     ??ADC_ISR_5
+     78          	case ADCIV_NONE:
+     79          		break;
+     80          	case ADCIV_ADCOVIFG: // When a conversion result is written to the ADCMEM0
+     81          	// before its previous conversion result was read.
+     82          		break;
+     83          	case ADCIV_ADCTOVIFG: // ADC conversion-time overflow
+     84          		break;
+     85          	case ADCIV_ADCHIIFG: // Window comparator interrupt flags
+     86          		break;
+     87          	case ADCIV_ADCLOIFG: // Window comparator interrupt flag
+     88          		break;
+     89          	case ADCIV_ADCINIFG: // Window comparator interrupt flag
+     90          		break;
+     91          	case ADCIV_ADCIFG: // ADCMEM0 memory register with the conversion result
+     92          		ADCCTL0 &= ~ADCENC; // Disable ENC bit.
+   \                     ??ADC_ISR_5:
+   \   000016   A2C30007     BIC.W   #0x2, &0x700
+     93          		switch (ADC_Channel++) {
+   \   00001A   1F42....     MOV.W   &ADC_Channel, R15
+   \   00001E   0E4F         MOV.W   R15, R14
+   \   000020   1E53         ADD.W   #0x1, R14
+   \   000022   824E....     MOV.W   R14, &ADC_Channel
+   \   000026   0F83         SUB.W   #0x0, R15
+   \   000028   0524         JEQ     ??ADC_ISR_2
+   \   00002A   1F83         SUB.W   #0x1, R15
+   \   00002C   1324         JEQ     ??ADC_ISR_3
+   \   00002E   1F83         SUB.W   #0x1, R15
+   \   000030   2224         JEQ     ??ADC_ISR_4
+   \   000032   303C         JMP     ??ADC_ISR_0
+     94          		case 0x00:
+     95          			ADCMCTL0 &= ~ADCINCH_2;
+   \                     ??ADC_ISR_2:
+   \   000034   A2C30A07     BIC.W   #0x2, &0x70a
+     96          			ADCMCTL0 |= ADCINCH_3;
+   \   000038   B2D003000A07 BIS.W   #0x3, &0x70a
+     97          			ADC_Left_Detect = ADCMEM0;
+   \   00003E   92421207.... MOV.W   &0x712, &ADC_Left_Detect
+     98          			ADC_Left_Detect = ADC_Left_Detect >> 2;
+   \   000044   1F42....     MOV.W   &ADC_Left_Detect, R15
+   \   000048   5F07         RRUM.W  #0x2, R15
+   \   00004A   824F....     MOV.W   R15, &ADC_Left_Detect
+     99          			ADCCTL0 |= ADCSC;
+   \   00004E   92D30007     BIS.W   #0x1, &0x700
+    100          			// HEXtoBCD(ADC_Left_Detect);
+    101          			// adc_line2(6);
+    102          			break;
+   \   000052   203C         JMP     ??ADC_ISR_0
+    103          		case 0x01: // Channel A2 Interrupt
+    104          			ADCMCTL0 &= ~ADCINCH_3; // Disable Last channel A2
+   \                     ??ADC_ISR_3:
+   \   000054   B2F0FCFF0A07 AND.W   #0xfffc, &0x70a
+    105          			ADCMCTL0 |= ADCINCH_5; // Enable Next channel A3
+   \   00005A   B2D005000A07 BIS.W   #0x5, &0x70a
+    106          			ADC_Right_Detect = ADCMEM0; // Move result into Global
+   \   000060   92421207.... MOV.W   &0x712, &ADC_Right_Detect
+    107          			ADC_Right_Detect = ADC_Right_Detect >> 2; // Divide the result by 4
+   \   000066   1F42....     MOV.W   &ADC_Right_Detect, R15
+   \   00006A   5F07         RRUM.W  #0x2, R15
+   \   00006C   824F....     MOV.W   R15, &ADC_Right_Detect
+    108          			ADCCTL0 |= ADCSC;
+   \   000070   92D30007     BIS.W   #0x1, &0x700
+    109          			// HEXtoBCD(ADC_Right_Detect); // Convert result to String
+    110          			// adc_line3(6); // Place String in Display
+    111          			break;
+   \   000074   0F3C         JMP     ??ADC_ISR_0
+    112          		case 0x02:
+    113          			ADCMCTL0 &= ~ADCINCH_5;
+   \                     ??ADC_ISR_4:
+   \   000076   B2F0FAFF0A07 AND.W   #0xfffa, &0x70a
+    114          			ADCMCTL0 |= ADCINCH_2;
+   \   00007C   A2D30A07     BIS.W   #0x2, &0x70a
+    115          			ADC_Thumb = ADCMEM0;
+   \   000080   92421207.... MOV.W   &0x712, &ADC_Thumb
+    116          			ADC_Thumb = ADC_Thumb >> 2;
+   \   000086   1F42....     MOV.W   &ADC_Thumb, R15
+   \   00008A   5F07         RRUM.W  #0x2, R15
+   \   00008C   824F....     MOV.W   R15, &ADC_Thumb
+    117          			ADC_Channel = RESET_STATE;
+   \   000090   8243....     MOV.W   #0x0, &ADC_Channel
+    118          			// HEXtoBCD(ADC_Thumb);
+    119          			// adc_line4(6);
+    120          			break;
+    121          		default:
+    122          			break;
+    123          		}
+    124          		ADCCTL0 |= ADCENC;
+   \                     ??ADC_ISR_0:
+   \   000094   A2D30007     BIS.W   #0x2, &0x700
+    125          		
+    126          	default:
+    127          		break;
+    128          	}
+    129          }
+   \                     ??ADC_ISR_1:
+   \   000098   1E17         POPM.W  #0x2, R15
+   \   00009A   0013         RETI
+   \   00009C                REQUIRE _A_ADCCTL0_L
+   \   00009C                REQUIRE _A_ADCMCTL0_L
+   \   00009C                REQUIRE _A_ADCMEM0_L
+   \   00009C                REQUIRE _A_ADCIV_L
+
+   \                                 In  segment INTVEC, offset 0x2c, root
+   \                     `??switchP4_interrupt::??INTVEC 44`:
+   \   00002C   ....         DC16    switchP4_interrupt
+
+   \                                 In  segment INTVEC, offset 0x30, root
+   \                     `??switchP2_interrupt::??INTVEC 48`:
+   \   000030   ....         DC16    switchP2_interrupt
+
+   \                                 In  segment INTVEC, offset 0x3a, root
+   \                     `??ADC_ISR::??INTVEC 58`:
+   \   00003A   ....         DC16    ADC_ISR
+    130          
+    131          //------------------------------------------------------------------------------
+
+   Maximum stack usage in bytes:
+
+   CSTACK Function
+   ------ --------
+      8   ADC_ISR
+      4   switchP2_interrupt
+      4   switchP4_interrupt
+
+
+   Segment part sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       2  ADC_Channel
+     156  ADC_ISR
+       2  ADC_ISR::??INTVEC 58
+       2  ADC_Left_Detect
+       2  ADC_Right_Detect
+       2  ADC_Thumb
+       2  _A_ADCCTL0_L
+       2  _A_ADCIV_L
+       2  _A_ADCMCTL0_L
+       2  _A_ADCMEM0_L
+       2  _A_PAIE_L
+       2  _A_PAIFG_L
+       2  _A_PBIE_L
+       2  _A_PBIFG_L
+       2  _A_TB0CCTL0_L
+       2  _A_TB0CCTL1_L
+      36  switchP2_interrupt
+       2  switchP2_interrupt::??INTVEC 48
+      36  switchP4_interrupt
+       2  switchP4_interrupt::??INTVEC 44
+       2  switch_one_debounce_count
+       2  switch_one_debouncing
+       2  switch_one_press_count
+       2  switch_two_debounce_count
+       2  switch_two_debouncing
+
+ 
+  20 bytes in segment DATA16_AN
+  18 bytes in segment DATA16_Z
+   6 bytes in segment INTVEC
+ 228 bytes in segment ISR_CODE
+ 
+ 228 bytes of CODE  memory
+   0 bytes of CONST memory (+  6 bytes shared)
+  18 bytes of DATA  memory (+ 20 bytes shared)
+
+Errors: none
+Warnings: none

@@ -1,0 +1,838 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V7.20.1.997/W32 for MSP430           22/Sep/2020  12:28:46
+# Copyright 1996-2020 IAR Systems AB.
+# PC-locked license - IAR Embedded Workbench for MSP430, 8K KickStart Edition 7.20
+#
+#    __rt_version  =  3
+#    __double_size =  32
+#    __reg_r4      =  free
+#    __reg_r5      =  free
+#    __pic         =  no
+#    __core        =  430X
+#    __data_model  =  small
+#    __code_model  =  large
+#    Source file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_04\shapes.c
+#    Command line  =  
+#        -f C:\Users\19196\AppData\Local\Temp\EW7A12.tmp
+#        ("C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_04\shapes.c" -lC
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_04\Debug\List" -o
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_04\Debug\Obj" --no_cse --no_unroll --no_inline
+#        --no_code_motion --no_tbaa --debug -D__MSP430FR2355__ -e --double=32
+#        --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.4\430\lib\dlib\dl430xlsfn.h" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.4\430\" --core=430X --data_model=small
+#        -On --multiplier=32 --hw_workaround=CPU40 --code_model=large)
+#    Locale        =  English_USA.1252
+#    List file     =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_04\Debug\List\shapes.lst
+#    Object file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_04\Debug\Obj\shapes.r43
+#
+###############################################################################
+
+C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_04\shapes.c
+      1          #include  "msp430.h"
+
+   \                                 In  segment DATA16_AN, at 0x242
+   \   union <unnamed> _A_PCOUT_L
+   \                     _A_PCOUT_L:
+   \   000000                DS8 2
+      2          #include  "functions.h"
+      3          #include <string.h>
+      4          #include  "macros.h"
+      5          
+      6          extern volatile unsigned int myClock;
+      7          extern unsigned int driveEnable;
+      8          extern unsigned int driveState;
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+      9          extern volatile char circle_state = NONE;
+   \                     circle_state:
+   \   000000                DS8 1
+   \   000001                REQUIRE `?<Initializer for circle_state>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     10          extern volatile char eight_state = NONE;
+   \                     eight_state:
+   \   000000                DS8 1
+   \   000001                REQUIRE `?<Initializer for eight_state>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     11          extern volatile char triangle_state = NONE;
+   \                     triangle_state:
+   \   000000                DS8 1
+   \   000001                REQUIRE `?<Initializer for triangle_state>`
+     12          extern volatile char event;
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     13          unsigned int delay = RESET_STATE;
+   \                     delay:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     14          unsigned int right_count = RESET_STATE;
+   \                     right_count:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     15          unsigned int left_count = RESET_STATE;
+   \                     left_count:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     16          unsigned int run_count = RESET_STATE;
+   \                     run_count:
+   \   000000                DS8 2
+     17          extern volatile unsigned int car_moving;
+     18          
+     19          
+     20          extern volatile unsigned int timeChange;
+     21          extern volatile unsigned char display_changed;
+     22          extern char display_line[4][11];
+     23          
+
+   \                                 In  segment CODE, align 2
+     24          void driveCircle(void) {
+   \                     driveCircle:
+     25          	switch (circle_state) {
+   \   000000   5E42....     MOV.B   &circle_state, R14
+   \   000004   7E804500     SUB.B   #0x45, R14
+   \   000008   5C24         JEQ     ??driveCircle_4
+   \   00000A   7E800D00     SUB.B   #0xd, R14
+   \   00000E   2824         JEQ     ??driveCircle_5
+   \   000010   5E83         SUB.B   #0x1, R14
+   \   000012   1824         JEQ     ??driveCircle_6
+   \   000014   6E82         SUB.B   #0x4, R14
+   \   000016   6920         JNE     ??driveCircle_0
+     26          	case WAIT:
+     27          		car_moving = ALWAYS;
+   \   000018   9243....     MOV.W   #0x1, &car_moving
+     28          		if (timeChange) {
+   \   00001C   8293....     CMP.W   #0x0, &timeChange
+   \   000020   6424         JEQ     ??driveCircle_0
+     29          			timeChange = 0;
+   \   000022   8243....     MOV.W   #0x0, &timeChange
+     30          			if (delay++ >= WAITING2START) {
+   \   000026   1F42....     MOV.W   &delay, R15
+   \   00002A   0E4F         MOV.W   R15, R14
+   \   00002C   1E53         ADD.W   #0x1, R14
+   \   00002E   824E....     MOV.W   R14, &delay
+   \   000032   3F903200     CMP.W   #0x32, R15
+   \   000036   5928         JNC     ??driveCircle_0
+     31          				delay = 0;
+   \   000038   8243....     MOV.W   #0x0, &delay
+     32          				circle_state = START;
+   \   00003C   F2405300.... MOV.B   #0x53, &circle_state
+     33          			}
+     34          		}
+     35          		break;
+   \   000042   1001         RETA
+     36          	case START:
+     37          		myClock = RESET_STATE;
+   \                     ??driveCircle_6:
+   \   000044   8243....     MOV.W   #0x0, &myClock
+     38          		left_count = RESET_STATE;
+   \   000048   8243....     MOV.W   #0x0, &left_count
+     39          		right_count = RESET_STATE;
+   \   00004C   8243....     MOV.W   #0x0, &right_count
+     40          		run_count = RESET_STATE;
+   \   000050   8243....     MOV.W   #0x0, &run_count
+     41          		driveForward();
+   \   000054   ........     CALLA   #driveForward
+     42          		circle_state = RUN;
+   \   000058   F2405200.... MOV.B   #0x52, &circle_state
+     43          		break;
+   \   00005E   1001         RETA
+     44          	case RUN:
+     45          		if (timeChange) {
+   \                     ??driveCircle_5:
+   \   000060   8293....     CMP.W   #0x0, &timeChange
+   \   000064   4224         JEQ     ??driveCircle_0
+     46          			timeChange = 0;
+   \   000066   8243....     MOV.W   #0x0, &timeChange
+     47          			if (run_count <= CIRCLE_SEGMENT_COUNT) {
+   \   00006A   B2900D00.... CMP.W   #0xd, &run_count
+   \   000070   242C         JC      ??driveCircle_7
+     48          				if (left_count++ >= CIRCLE_LEFT_ON_COUNT) {
+   \   000072   1F42....     MOV.W   &left_count, R15
+   \   000076   0E4F         MOV.W   R15, R14
+   \   000078   1E53         ADD.W   #0x1, R14
+   \   00007A   824E....     MOV.W   R14, &left_count
+   \   00007E   0F93         CMP.W   #0x0, R15
+   \   000080   0224         JEQ     ??driveCircle_8
+     49          					P6OUT &= ~L_FORWARD;
+   \   000082   E2C34302     BIC.B   #0x2, &0x243
+     50          				}
+     51          				if (right_count++ >= CIRCLE_RIGHT_ON_COUNT) {
+   \                     ??driveCircle_8:
+   \   000086   1F42....     MOV.W   &right_count, R15
+   \   00008A   0E4F         MOV.W   R15, R14
+   \   00008C   1E53         ADD.W   #0x1, R14
+   \   00008E   824E....     MOV.W   R14, &right_count
+   \   000092   3F900900     CMP.W   #0x9, R15
+   \   000096   0228         JNC     ??driveCircle_9
+     52          					P6OUT &= ~R_FORWARD;
+   \   000098   D2C34302     BIC.B   #0x1, &0x243
+     53          				}
+     54          				if (myClock >= CIRCLE_WHEEL_CYCLE_COUNT) {
+   \                     ??driveCircle_9:
+   \   00009C   B2900A00.... CMP.W   #0xa, &myClock
+   \   0000A2   2328         JNC     ??driveCircle_0
+     55          					myClock = RESET_STATE;
+   \   0000A4   8243....     MOV.W   #0x0, &myClock
+     56          					left_count = RESET_STATE;
+   \   0000A8   8243....     MOV.W   #0x0, &left_count
+     57          					right_count = RESET_STATE;
+   \   0000AC   8243....     MOV.W   #0x0, &right_count
+     58          					run_count++;
+   \   0000B0   9253....     ADD.W   #0x1, &run_count
+     59          					driveForward();
+   \   0000B4   ........     CALLA   #driveForward
+   \   0000B8   1001         RETA
+     60          				}
+     61          			}
+     62          			else {
+     63          				circle_state = END;
+   \                     ??driveCircle_7:
+   \   0000BA   F2404500.... MOV.B   #0x45, &circle_state
+     64          			}
+     65          		}
+     66          		break;
+   \   0000C0   1001         RETA
+     67          	case END:
+     68          		car_moving = RESET_STATE;
+   \                     ??driveCircle_4:
+   \   0000C2   8243....     MOV.W   #0x0, &car_moving
+     69          
+     70          		myClock = RESET_STATE;
+   \   0000C6   8243....     MOV.W   #0x0, &myClock
+     71          		left_count = RESET_STATE;
+   \   0000CA   8243....     MOV.W   #0x0, &left_count
+     72          		right_count = RESET_STATE;
+   \   0000CE   8243....     MOV.W   #0x0, &right_count
+     73          		run_count = RESET_STATE;
+   \   0000D2   8243....     MOV.W   #0x0, &run_count
+     74          		delay = RESET_STATE;
+   \   0000D6   8243....     MOV.W   #0x0, &delay
+     75          		circle_state = NONE;
+   \   0000DA   F2404E00.... MOV.B   #0x4e, &circle_state
+     76          		event = NONE;
+   \   0000E0   F2404E00.... MOV.B   #0x4e, &event
+     77          		motorsOff();
+   \   0000E6   ........     CALLA   #motorsOff
+     78          		break;
+     79          	default: 
+     80          		break;
+     81          	}
+     82          	
+     83          
+     84          }
+   \                     ??driveCircle_0:
+   \   0000EA   1001         RETA
+   \   0000EC                REQUIRE _A_PCOUT_L
+     85          
+
+   \                                 In  segment CODE, align 2
+     86          void driveFigureEight(void) {
+   \                     driveFigureEight:
+     87          	switch (eight_state) {
+   \   000000   5E42....     MOV.B   &eight_state, R14
+   \   000004   7E804500     SUB.B   #0x45, R14
+   \   000008   E424         JEQ     ??driveFigureEight_4
+   \   00000A   7E800D00     SUB.B   #0xd, R14
+   \   00000E   2824         JEQ     ??driveFigureEight_5
+   \   000010   5E83         SUB.B   #0x1, R14
+   \   000012   1824         JEQ     ??driveFigureEight_6
+   \   000014   6E82         SUB.B   #0x4, R14
+   \   000016   EF20         JNE     ??driveFigureEight_0
+     88          	case WAIT:
+     89          		car_moving = ALWAYS;
+   \   000018   9243....     MOV.W   #0x1, &car_moving
+     90          		if (timeChange) {
+   \   00001C   8293....     CMP.W   #0x0, &timeChange
+   \   000020   EA24         JEQ     ??driveFigureEight_0
+     91          			timeChange = 0;
+   \   000022   8243....     MOV.W   #0x0, &timeChange
+     92          			if (delay++ >= WAITING2START) {
+   \   000026   1F42....     MOV.W   &delay, R15
+   \   00002A   0E4F         MOV.W   R15, R14
+   \   00002C   1E53         ADD.W   #0x1, R14
+   \   00002E   824E....     MOV.W   R14, &delay
+   \   000032   3F903200     CMP.W   #0x32, R15
+   \   000036   DF28         JNC     ??driveFigureEight_0
+     93          				delay = 0;
+   \   000038   8243....     MOV.W   #0x0, &delay
+     94          				eight_state = START;
+   \   00003C   F2405300.... MOV.B   #0x53, &eight_state
+     95          			}
+     96          		}
+     97          		break;
+   \   000042   1001         RETA
+     98          	case START:
+     99          		myClock = RESET_STATE;
+   \                     ??driveFigureEight_6:
+   \   000044   8243....     MOV.W   #0x0, &myClock
+    100          		left_count = RESET_STATE;
+   \   000048   8243....     MOV.W   #0x0, &left_count
+    101          		right_count = RESET_STATE;
+   \   00004C   8243....     MOV.W   #0x0, &right_count
+    102          		run_count = RESET_STATE;
+   \   000050   8243....     MOV.W   #0x0, &run_count
+    103          		driveForward();
+   \   000054   ........     CALLA   #driveForward
+    104          		eight_state = RUN;
+   \   000058   F2405200.... MOV.B   #0x52, &eight_state
+    105          		break;
+   \   00005E   1001         RETA
+    106          	case RUN:
+    107          		if (timeChange) {
+   \                     ??driveFigureEight_5:
+   \   000060   8293....     CMP.W   #0x0, &timeChange
+   \   000064   C824         JEQ     ??driveFigureEight_0
+    108          			timeChange = 0;
+   \   000066   8243....     MOV.W   #0x0, &timeChange
+    109          			if (run_count <= EIGHT_SEGMENT_COUNT ) {
+   \   00006A   B2901A00.... CMP.W   #0x1a, &run_count
+   \   000070   AC2C         JC      ??driveFigureEight_7
+    110          				if (run_count <= EIGHT_SEGMENT_ONE_COUNT) {
+   \   000072   B2900700.... CMP.W   #0x7, &run_count
+   \   000078   242C         JC      ??driveFigureEight_8
+    111          					if (left_count++ >= EIGHT_LEFT_SLOWER_ON_COUNT) {
+   \   00007A   1F42....     MOV.W   &left_count, R15
+   \   00007E   0E4F         MOV.W   R15, R14
+   \   000080   1E53         ADD.W   #0x1, R14
+   \   000082   824E....     MOV.W   R14, &left_count
+   \   000086   0F93         CMP.W   #0x0, R15
+   \   000088   0224         JEQ     ??driveFigureEight_9
+    112          						P6OUT &= ~L_FORWARD;
+   \   00008A   E2C34302     BIC.B   #0x2, &0x243
+    113          					}
+    114          					if (right_count++ >= EIGHT_RIGHT_FASTER_ON_COUNT) {
+   \                     ??driveFigureEight_9:
+   \   00008E   1F42....     MOV.W   &right_count, R15
+   \   000092   0E4F         MOV.W   R15, R14
+   \   000094   1E53         ADD.W   #0x1, R14
+   \   000096   824E....     MOV.W   R14, &right_count
+   \   00009A   3F900900     CMP.W   #0x9, R15
+   \   00009E   0228         JNC     ??driveFigureEight_10
+    115          						P6OUT &= ~R_FORWARD;
+   \   0000A0   D2C34302     BIC.B   #0x1, &0x243
+    116          					}
+    117          					if (myClock >= EIGHT_TURN_LEFT_WHEEL_CYCLE_COUNT) {
+   \                     ??driveFigureEight_10:
+   \   0000A4   B2900A00.... CMP.W   #0xa, &myClock
+   \   0000AA   A528         JNC     ??driveFigureEight_0
+    118          						myClock = RESET_STATE;
+   \   0000AC   8243....     MOV.W   #0x0, &myClock
+    119          						left_count = RESET_STATE;
+   \   0000B0   8243....     MOV.W   #0x0, &left_count
+    120          						right_count = RESET_STATE;
+   \   0000B4   8243....     MOV.W   #0x0, &right_count
+    121          						run_count++;
+   \   0000B8   9253....     ADD.W   #0x1, &run_count
+    122          						driveForward();
+   \   0000BC   ........     CALLA   #driveForward
+   \   0000C0   1001         RETA
+    123          					}
+    124          				}
+    125          				else if ((run_count > EIGHT_SEGMENT_ONE_COUNT) && (run_count <= EIGHT_SEGMENT_TWO_COUNT)) {
+   \                     ??driveFigureEight_8:
+   \   0000C2   B2900700.... CMP.W   #0x7, &run_count
+   \   0000C8   2828         JNC     ??driveFigureEight_11
+   \   0000CA   B2900E00.... CMP.W   #0xe, &run_count
+   \   0000D0   242C         JC      ??driveFigureEight_11
+    126          					if (right_count++ >= EIGHT_RIGHT_SLOWER_ON_COUNT) {
+   \   0000D2   1F42....     MOV.W   &right_count, R15
+   \   0000D6   0E4F         MOV.W   R15, R14
+   \   0000D8   1E53         ADD.W   #0x1, R14
+   \   0000DA   824E....     MOV.W   R14, &right_count
+   \   0000DE   0F93         CMP.W   #0x0, R15
+   \   0000E0   0224         JEQ     ??driveFigureEight_12
+    127          						P6OUT &= ~R_FORWARD;
+   \   0000E2   D2C34302     BIC.B   #0x1, &0x243
+    128          					}
+    129          					if (left_count++ >= EIGHT_LEFT_FASTER_ON_COUNT) {
+   \                     ??driveFigureEight_12:
+   \   0000E6   1F42....     MOV.W   &left_count, R15
+   \   0000EA   0E4F         MOV.W   R15, R14
+   \   0000EC   1E53         ADD.W   #0x1, R14
+   \   0000EE   824E....     MOV.W   R14, &left_count
+   \   0000F2   3F900B00     CMP.W   #0xb, R15
+   \   0000F6   0228         JNC     ??driveFigureEight_13
+    130          						P6OUT &= ~L_FORWARD;
+   \   0000F8   E2C34302     BIC.B   #0x2, &0x243
+    131          					}
+    132          					if (myClock >= EIGHT_TURN_RIGHT_WHEEL_CYCLE_COUNT) {
+   \                     ??driveFigureEight_13:
+   \   0000FC   B2900B00.... CMP.W   #0xb, &myClock
+   \   000102   7928         JNC     ??driveFigureEight_0
+    133          						myClock = RESET_STATE;
+   \   000104   8243....     MOV.W   #0x0, &myClock
+    134          						left_count = RESET_STATE;
+   \   000108   8243....     MOV.W   #0x0, &left_count
+    135          						right_count = RESET_STATE;
+   \   00010C   8243....     MOV.W   #0x0, &right_count
+    136          						run_count++;
+   \   000110   9253....     ADD.W   #0x1, &run_count
+    137          						driveForward();
+   \   000114   ........     CALLA   #driveForward
+   \   000118   1001         RETA
+    138          					}
+    139          				}
+    140          				else if ((run_count > EIGHT_SEGMENT_TWO_COUNT) && (run_count <= EIGHT_SEGMENT_THREE_COUNT)) {
+   \                     ??driveFigureEight_11:
+   \   00011A   B2900E00.... CMP.W   #0xe, &run_count
+   \   000120   2828         JNC     ??driveFigureEight_14
+   \   000122   B2901400.... CMP.W   #0x14, &run_count
+   \   000128   242C         JC      ??driveFigureEight_14
+    141          					if (left_count++ >= EIGHT_LEFT_SLOWER_ON_COUNT) {
+   \   00012A   1F42....     MOV.W   &left_count, R15
+   \   00012E   0E4F         MOV.W   R15, R14
+   \   000130   1E53         ADD.W   #0x1, R14
+   \   000132   824E....     MOV.W   R14, &left_count
+   \   000136   0F93         CMP.W   #0x0, R15
+   \   000138   0224         JEQ     ??driveFigureEight_15
+    142          						P6OUT &= ~L_FORWARD;
+   \   00013A   E2C34302     BIC.B   #0x2, &0x243
+    143          					}
+    144          					if (right_count++ >= EIGHT_RIGHT_FASTER_ON_COUNT) {
+   \                     ??driveFigureEight_15:
+   \   00013E   1F42....     MOV.W   &right_count, R15
+   \   000142   0E4F         MOV.W   R15, R14
+   \   000144   1E53         ADD.W   #0x1, R14
+   \   000146   824E....     MOV.W   R14, &right_count
+   \   00014A   3F900900     CMP.W   #0x9, R15
+   \   00014E   0228         JNC     ??driveFigureEight_16
+    145          						P6OUT &= ~R_FORWARD;
+   \   000150   D2C34302     BIC.B   #0x1, &0x243
+    146          					}
+    147          					if (myClock >= EIGHT_TURN_LEFT_WHEEL_CYCLE_COUNT) {
+   \                     ??driveFigureEight_16:
+   \   000154   B2900A00.... CMP.W   #0xa, &myClock
+   \   00015A   4D28         JNC     ??driveFigureEight_0
+    148          						myClock = RESET_STATE;
+   \   00015C   8243....     MOV.W   #0x0, &myClock
+    149          						left_count = RESET_STATE;
+   \   000160   8243....     MOV.W   #0x0, &left_count
+    150          						right_count = RESET_STATE;
+   \   000164   8243....     MOV.W   #0x0, &right_count
+    151          						run_count++;
+   \   000168   9253....     ADD.W   #0x1, &run_count
+    152          						driveForward();
+   \   00016C   ........     CALLA   #driveForward
+   \   000170   1001         RETA
+    153          					}
+    154          				}
+    155          				
+    156          				
+    157          				else if ((run_count > EIGHT_SEGMENT_THREE_COUNT) && (run_count <= EIGHT_SEGMENT_COUNT)) {
+   \                     ??driveFigureEight_14:
+   \   000172   B2901400.... CMP.W   #0x14, &run_count
+   \   000178   3E28         JNC     ??driveFigureEight_0
+   \   00017A   B2901A00.... CMP.W   #0x1a, &run_count
+   \   000180   3A2C         JC      ??driveFigureEight_0
+    158          					if (right_count++ >= EIGHT_RIGHT_SLOWER_ON_COUNT) {
+   \   000182   1F42....     MOV.W   &right_count, R15
+   \   000186   0E4F         MOV.W   R15, R14
+   \   000188   1E53         ADD.W   #0x1, R14
+   \   00018A   824E....     MOV.W   R14, &right_count
+   \   00018E   0F93         CMP.W   #0x0, R15
+   \   000190   0224         JEQ     ??driveFigureEight_17
+    159          						P6OUT &= ~R_FORWARD;
+   \   000192   D2C34302     BIC.B   #0x1, &0x243
+    160          					}
+    161          					if (left_count++ >= EIGHT_LEFT_FASTER_ON_COUNT) {
+   \                     ??driveFigureEight_17:
+   \   000196   1F42....     MOV.W   &left_count, R15
+   \   00019A   0E4F         MOV.W   R15, R14
+   \   00019C   1E53         ADD.W   #0x1, R14
+   \   00019E   824E....     MOV.W   R14, &left_count
+   \   0001A2   3F900B00     CMP.W   #0xb, R15
+   \   0001A6   0228         JNC     ??driveFigureEight_18
+    162          						P6OUT &= ~L_FORWARD;
+   \   0001A8   E2C34302     BIC.B   #0x2, &0x243
+    163          					}
+    164          					if (myClock >= EIGHT_TURN_RIGHT_WHEEL_CYCLE_COUNT) {
+   \                     ??driveFigureEight_18:
+   \   0001AC   B2900B00.... CMP.W   #0xb, &myClock
+   \   0001B2   2128         JNC     ??driveFigureEight_0
+    165          						myClock = RESET_STATE;
+   \   0001B4   8243....     MOV.W   #0x0, &myClock
+    166          						left_count = RESET_STATE;
+   \   0001B8   8243....     MOV.W   #0x0, &left_count
+    167          						right_count = RESET_STATE;
+   \   0001BC   8243....     MOV.W   #0x0, &right_count
+    168          						run_count++;
+   \   0001C0   9253....     ADD.W   #0x1, &run_count
+    169          						driveForward();
+   \   0001C4   ........     CALLA   #driveForward
+   \   0001C8   1001         RETA
+    170          					}
+    171          				}
+    172          				
+    173          
+    174          			}
+    175          			else {
+    176          				eight_state = END;
+   \                     ??driveFigureEight_7:
+   \   0001CA   F2404500.... MOV.B   #0x45, &eight_state
+    177          			}
+    178          		}
+    179          		break;
+   \   0001D0   1001         RETA
+    180          	case END:
+    181          		car_moving = RESET_STATE;
+   \                     ??driveFigureEight_4:
+   \   0001D2   8243....     MOV.W   #0x0, &car_moving
+    182          
+    183          		myClock = RESET_STATE;
+   \   0001D6   8243....     MOV.W   #0x0, &myClock
+    184          		left_count = RESET_STATE;
+   \   0001DA   8243....     MOV.W   #0x0, &left_count
+    185          		right_count = RESET_STATE;
+   \   0001DE   8243....     MOV.W   #0x0, &right_count
+    186          		run_count = RESET_STATE;
+   \   0001E2   8243....     MOV.W   #0x0, &run_count
+    187          		eight_state = NONE;
+   \   0001E6   F2404E00.... MOV.B   #0x4e, &eight_state
+    188          		event = NONE;
+   \   0001EC   F2404E00.... MOV.B   #0x4e, &event
+    189          		motorsOff();
+   \   0001F2   ........     CALLA   #motorsOff
+    190          		break;
+    191          	default:
+    192          		break;
+    193          	}
+    194          	
+    195          }
+   \                     ??driveFigureEight_0:
+   \   0001F6   1001         RETA
+   \   0001F8                REQUIRE _A_PCOUT_L
+    196          
+
+   \                                 In  segment CODE, align 2
+    197          void driveTriangle(void) {
+   \                     driveTriangle:
+    198          	switch (triangle_state) {
+   \   000000   5E42....     MOV.B   &triangle_state, R14
+   \   000004   7E804500     SUB.B   #0x45, R14
+   \   000008   AD24         JEQ     ??driveTriangle_4
+   \   00000A   7E800D00     SUB.B   #0xd, R14
+   \   00000E   2824         JEQ     ??driveTriangle_5
+   \   000010   5E83         SUB.B   #0x1, R14
+   \   000012   1824         JEQ     ??driveTriangle_6
+   \   000014   6E82         SUB.B   #0x4, R14
+   \   000016   B820         JNE     ??driveTriangle_0
+    199          	case WAIT:
+    200          		car_moving = ALWAYS;
+   \   000018   9243....     MOV.W   #0x1, &car_moving
+    201          		if (timeChange) {
+   \   00001C   8293....     CMP.W   #0x0, &timeChange
+   \   000020   B324         JEQ     ??driveTriangle_0
+    202          			timeChange = 0;
+   \   000022   8243....     MOV.W   #0x0, &timeChange
+    203          			if (delay++ >= WAITING2START) {
+   \   000026   1F42....     MOV.W   &delay, R15
+   \   00002A   0E4F         MOV.W   R15, R14
+   \   00002C   1E53         ADD.W   #0x1, R14
+   \   00002E   824E....     MOV.W   R14, &delay
+   \   000032   3F903200     CMP.W   #0x32, R15
+   \   000036   A828         JNC     ??driveTriangle_0
+    204          				delay = 0;
+   \   000038   8243....     MOV.W   #0x0, &delay
+    205          				triangle_state = START;
+   \   00003C   F2405300.... MOV.B   #0x53, &triangle_state
+    206          			}
+    207          		}
+    208          		break;
+   \   000042   1001         RETA
+    209          
+    210          	case START:
+    211          		myClock = RESET_STATE;
+   \                     ??driveTriangle_6:
+   \   000044   8243....     MOV.W   #0x0, &myClock
+    212          		right_count = RESET_STATE;
+   \   000048   8243....     MOV.W   #0x0, &right_count
+    213          		left_count = RESET_STATE;
+   \   00004C   8243....     MOV.W   #0x0, &left_count
+    214          		run_count = RESET_STATE;
+   \   000050   8243....     MOV.W   #0x0, &run_count
+    215          		driveForward();
+   \   000054   ........     CALLA   #driveForward
+    216          		triangle_state = RUN;
+   \   000058   F2405200.... MOV.B   #0x52, &triangle_state
+    217          		break;
+   \   00005E   1001         RETA
+    218          	case RUN:
+    219          		if (timeChange) {
+   \                     ??driveTriangle_5:
+   \   000060   8293....     CMP.W   #0x0, &timeChange
+   \   000064   9124         JEQ     ??driveTriangle_0
+    220          			timeChange = 0;
+   \   000066   8243....     MOV.W   #0x0, &timeChange
+    221          			if (myClock <= 120) {
+   \   00006A   B2907900.... CMP.W   #0x79, &myClock
+   \   000070   752C         JC      ??driveTriangle_7
+    222          				if (myClock < 6) {
+   \   000072   B2900600.... CMP.W   #0x6, &myClock
+   \   000078   032C         JC      ??driveTriangle_8
+    223          					driveForward();
+   \   00007A   ........     CALLA   #driveForward
+   \   00007E   1001         RETA
+    224          
+    225          				}
+    226          				else if ((myClock > 6) && (myClock <= 22)) {
+   \                     ??driveTriangle_8:
+   \   000080   B2900700.... CMP.W   #0x7, &myClock
+   \   000086   0728         JNC     ??driveTriangle_9
+   \   000088   B2901700.... CMP.W   #0x17, &myClock
+   \   00008E   032C         JC      ??driveTriangle_9
+    227          					P6OUT &= ~L_FORWARD;
+   \   000090   E2C34302     BIC.B   #0x2, &0x243
+   \   000094   1001         RETA
+    228          				}
+    229          				else if ((myClock > 22) && (myClock <= 28)) {
+   \                     ??driveTriangle_9:
+   \   000096   B2901700.... CMP.W   #0x17, &myClock
+   \   00009C   0728         JNC     ??driveTriangle_10
+   \   00009E   B2901D00.... CMP.W   #0x1d, &myClock
+   \   0000A4   032C         JC      ??driveTriangle_10
+    230          					driveForward();
+   \   0000A6   ........     CALLA   #driveForward
+   \   0000AA   1001         RETA
+    231          				}
+    232          				else if ((myClock > 28) && (myClock <= 44 )) {
+   \                     ??driveTriangle_10:
+   \   0000AC   B2901D00.... CMP.W   #0x1d, &myClock
+   \   0000B2   0728         JNC     ??driveTriangle_11
+   \   0000B4   B2902D00.... CMP.W   #0x2d, &myClock
+   \   0000BA   032C         JC      ??driveTriangle_11
+    233          					P6OUT &= ~L_FORWARD;
+   \   0000BC   E2C34302     BIC.B   #0x2, &0x243
+   \   0000C0   1001         RETA
+    234          				}
+    235          				else if ((myClock > 44) && (myClock <= 50)) {
+   \                     ??driveTriangle_11:
+   \   0000C2   B2902D00.... CMP.W   #0x2d, &myClock
+   \   0000C8   0728         JNC     ??driveTriangle_12
+   \   0000CA   B2903300.... CMP.W   #0x33, &myClock
+   \   0000D0   032C         JC      ??driveTriangle_12
+    236          					driveForward();
+   \   0000D2   ........     CALLA   #driveForward
+   \   0000D6   1001         RETA
+    237          				}
+    238          				else if ((myClock > 50) && (myClock <= 66)) {
+   \                     ??driveTriangle_12:
+   \   0000D8   B2903300.... CMP.W   #0x33, &myClock
+   \   0000DE   0728         JNC     ??driveTriangle_13
+   \   0000E0   B2904300.... CMP.W   #0x43, &myClock
+   \   0000E6   032C         JC      ??driveTriangle_13
+    239          					P6OUT &= ~L_FORWARD;
+   \   0000E8   E2C34302     BIC.B   #0x2, &0x243
+   \   0000EC   1001         RETA
+    240          				}
+    241          				else if ((myClock > 66) && (myClock <= 72)) {
+   \                     ??driveTriangle_13:
+   \   0000EE   B2904300.... CMP.W   #0x43, &myClock
+   \   0000F4   0728         JNC     ??driveTriangle_14
+   \   0000F6   B2904900.... CMP.W   #0x49, &myClock
+   \   0000FC   032C         JC      ??driveTriangle_14
+    242          					driveForward();
+   \   0000FE   ........     CALLA   #driveForward
+   \   000102   1001         RETA
+    243          				}
+    244          				else if ((myClock > 72) && (myClock <= 90)) {
+   \                     ??driveTriangle_14:
+   \   000104   B2904900.... CMP.W   #0x49, &myClock
+   \   00010A   0728         JNC     ??driveTriangle_15
+   \   00010C   B2905B00.... CMP.W   #0x5b, &myClock
+   \   000112   032C         JC      ??driveTriangle_15
+    245          					P6OUT &= ~L_FORWARD;
+   \   000114   E2C34302     BIC.B   #0x2, &0x243
+   \   000118   1001         RETA
+    246          				}
+    247          				else if ((myClock > 90) && (myClock <= 96)) {
+   \                     ??driveTriangle_15:
+   \   00011A   B2905B00.... CMP.W   #0x5b, &myClock
+   \   000120   0728         JNC     ??driveTriangle_16
+   \   000122   B2906100.... CMP.W   #0x61, &myClock
+   \   000128   032C         JC      ??driveTriangle_16
+    248          					driveForward();
+   \   00012A   ........     CALLA   #driveForward
+   \   00012E   1001         RETA
+    249          				}
+    250          				else if ((myClock > 96) && (myClock <= 114)) {
+   \                     ??driveTriangle_16:
+   \   000130   B2906100.... CMP.W   #0x61, &myClock
+   \   000136   0728         JNC     ??driveTriangle_17
+   \   000138   B2907300.... CMP.W   #0x73, &myClock
+   \   00013E   032C         JC      ??driveTriangle_17
+    251          					P6OUT &= ~L_FORWARD;
+   \   000140   E2C34302     BIC.B   #0x2, &0x243
+   \   000144   1001         RETA
+    252          				}
+    253          				else if ((myClock > 114) && (myClock <= 120)) {
+   \                     ??driveTriangle_17:
+   \   000146   B2907300.... CMP.W   #0x73, &myClock
+   \   00014C   1D28         JNC     ??driveTriangle_0
+   \   00014E   B2907900.... CMP.W   #0x79, &myClock
+   \   000154   192C         JC      ??driveTriangle_0
+    254          					driveForward();
+   \   000156   ........     CALLA   #driveForward
+   \   00015A   1001         RETA
+    255          				}
+    256          			}
+    257          			else {
+    258          				triangle_state = END;
+   \                     ??driveTriangle_7:
+   \   00015C   F2404500.... MOV.B   #0x45, &triangle_state
+    259          			}
+    260          		}
+    261          		break;
+   \   000162   1001         RETA
+    262          	case END:
+    263          		car_moving = RESET_STATE;
+   \                     ??driveTriangle_4:
+   \   000164   8243....     MOV.W   #0x0, &car_moving
+    264          
+    265          		myClock = RESET_STATE;
+   \   000168   8243....     MOV.W   #0x0, &myClock
+    266          		left_count = RESET_STATE;
+   \   00016C   8243....     MOV.W   #0x0, &left_count
+    267          		right_count = RESET_STATE;
+   \   000170   8243....     MOV.W   #0x0, &right_count
+    268          		run_count = RESET_STATE;
+   \   000174   8243....     MOV.W   #0x0, &run_count
+    269          		motorsOff();
+   \   000178   ........     CALLA   #motorsOff
+    270          		triangle_state = NONE;
+   \   00017C   F2404E00.... MOV.B   #0x4e, &triangle_state
+    271          		event = NONE;
+   \   000182   F2404E00.... MOV.B   #0x4e, &event
+    272          		break;
+    273          	default:
+    274          		break;
+    275          	}
+    276          
+    277          }
+   \                     ??driveTriangle_0:
+   \   000188   1001         RETA
+   \   00018A                REQUIRE _A_PCOUT_L
+    278          
+
+   \                                 In  segment CODE, align 2
+    279          void driveShapes(void) {
+   \                     driveShapes:
+    280          	switch (driveState) {
+   \   000000   1F42....     MOV.W   &driveState, R15
+   \   000004   3F804300     SUB.W   #0x43, R15
+   \   000008   0724         JEQ     ??driveShapes_1
+   \   00000A   3F800300     SUB.W   #0x3, R15
+   \   00000E   0724         JEQ     ??driveShapes_2
+   \   000010   3F800E00     SUB.W   #0xe, R15
+   \   000014   0724         JEQ     ??driveShapes_3
+   \   000016   1001         RETA
+    281          	case CIRCLE:
+    282          		driveCircle();
+   \                     ??driveShapes_1:
+   \   000018   ........     CALLA   #driveCircle
+    283          		break;
+   \   00001C   1001         RETA
+    284          
+    285          	case FIGURE_EIGHT:
+    286          		driveFigureEight();
+   \                     ??driveShapes_2:
+   \   00001E   ........     CALLA   #driveFigureEight
+    287          		break;
+   \   000022   1001         RETA
+    288          
+    289          	case TRIANGLE:
+    290          		driveTriangle();
+   \                     ??driveShapes_3:
+   \   000024   ........     CALLA   #driveTriangle
+    291          		break;
+    292          
+    293          	default:
+    294          		break;
+    295          	}
+    296          }
+   \   000028   1001         RETA
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for circle_state>`:
+   \   000000   4E           DC8 78
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for eight_state>`:
+   \   000000   4E           DC8 78
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for triangle_state>`:
+   \   000000   4E           DC8 78
+
+   Maximum stack usage in bytes:
+
+   CSTACK Function
+   ------ --------
+      4   driveCircle
+        4   -> driveForward
+        4   -> motorsOff
+      4   driveFigureEight
+        4   -> driveForward
+        4   -> motorsOff
+      4   driveShapes
+        4   -> driveCircle
+        4   -> driveFigureEight
+        4   -> driveTriangle
+      4   driveTriangle
+        4   -> driveForward
+        4   -> motorsOff
+
+
+   Segment part sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       1  ?<Initializer for circle_state>
+       1  ?<Initializer for eight_state>
+       1  ?<Initializer for triangle_state>
+       2  _A_PCOUT_L
+       1  circle_state
+       2  delay
+     236  driveCircle
+     504  driveFigureEight
+      42  driveShapes
+     394  driveTriangle
+       1  eight_state
+       2  left_count
+       2  right_count
+       2  run_count
+       1  triangle_state
+
+ 
+ 1 176 bytes in segment CODE
+     2 bytes in segment DATA16_AN
+     3 bytes in segment DATA16_I
+     3 bytes in segment DATA16_ID
+     8 bytes in segment DATA16_Z
+ 
+ 1 176 bytes of CODE  memory
+     3 bytes of CONST memory
+    11 bytes of DATA  memory (+ 2 bytes shared)
+
+Errors: none
+Warnings: none

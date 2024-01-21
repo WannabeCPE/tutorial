@@ -1,0 +1,290 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V7.20.1.997/W32 for MSP430           14/Sep/2020  12:29:18
+# Copyright 1996-2020 IAR Systems AB.
+# PC-locked license - IAR Embedded Workbench for MSP430, 8K KickStart Edition 7.20
+#
+#    __rt_version  =  3
+#    __double_size =  32
+#    __reg_r4      =  free
+#    __reg_r5      =  free
+#    __pic         =  no
+#    __core        =  430X
+#    __data_model  =  small
+#    __code_model  =  large
+#    Source file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_04\driveShapes.c
+#    Command line  =  
+#        -f C:\Users\19196\AppData\Local\Temp\EW490A.tmp
+#        ("C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_04\driveShapes.c" -lC
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_04\Debug\List" -o
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_04\Debug\Obj" --no_cse --no_unroll --no_inline
+#        --no_code_motion --no_tbaa --debug -D__MSP430FR2355__ -e --double=32
+#        --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.4\430\lib\dlib\dl430xlsfn.h" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.4\430\" --core=430X --data_model=small
+#        -On --multiplier=32 --hw_workaround=CPU40 --code_model=large)
+#    Locale        =  English_USA.1252
+#    List file     =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_04\Debug\List\driveShapes.lst
+#    Object file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_04\Debug\Obj\driveShapes.r43
+#
+###############################################################################
+
+C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_04\driveShapes.c
+      1          #include  "msp430.h"
+      2          #include  "functions.h"
+      3          #include <string.h>
+      4          #include  "macros.h"
+      5          
+      6          extern volatile unsigned int myClock;
+      7          extern unsigned int driveEnable;
+      8          extern char driveState;
+      9          extern volatile unsigned int timeChange;
+     10          extern volatile unsigned char display_changed;
+     11          extern char display_line[4][11];
+     12          
+
+   \                                 In  segment CODE, align 2
+     13          void driveCircle(void) {
+   \                     driveCircle:
+   \   000000   1B15         PUSHM.W #0x2, R11
+     14          	strcpy(display_line[0], "  CIRCLE  ");
+   \   000002   3D40....     MOV.W   #`?<Constant "  CIRCLE  ">`, R13
+   \   000006   3C40....     MOV.W   #display_line, R12
+   \   00000A   ........     CALLA   #strcpy
+     15          	update_string(display_line[0], 0);
+   \   00000E   0D43         MOV.W   #0x0, R13
+   \   000010   ........     CALLA   #update_string
+     16          	strcpy(display_line[1], "          ");
+   \   000014   3D40....     MOV.W   #`?<Constant "          ">`, R13
+   \   000018   3C40....     MOV.W   #display_line + 11, R12
+   \   00001C   ........     CALLA   #strcpy
+     17          	update_string(display_line[1], 1);
+   \   000020   1D43         MOV.W   #0x1, R13
+   \   000022   3C40....     MOV.W   #display_line + 11, R12
+   \   000026   ........     CALLA   #update_string
+     18          	strcpy(display_line[2], "          ");
+   \   00002A   3D40....     MOV.W   #`?<Constant "          ">`, R13
+   \   00002E   3C40....     MOV.W   #display_line + 22, R12
+   \   000032   ........     CALLA   #strcpy
+     19          	update_string(display_line[2], 2);
+   \   000036   2D43         MOV.W   #0x2, R13
+   \   000038   3C40....     MOV.W   #display_line + 22, R12
+   \   00003C   ........     CALLA   #update_string
+     20          	strcpy(display_line[3], "          ");
+   \   000040   3D40....     MOV.W   #`?<Constant "          ">`, R13
+   \   000044   3C40....     MOV.W   #display_line + 33, R12
+   \   000048   ........     CALLA   #strcpy
+     21          	update_string(display_line[3], 3);
+   \   00004C   3D400300     MOV.W   #0x3, R13
+   \   000050   3C40....     MOV.W   #display_line + 33, R12
+   \   000054   ........     CALLA   #update_string
+     22          	display_changed = 1;
+   \   000058   D243....     MOV.B   #0x1, &display_changed
+     23          
+     24          	unsigned int wait = 200;
+   \   00005C   3A40C800     MOV.W   #0xc8, R10
+     25          	unsigned int drive = 1000;
+   \   000060   3B40E803     MOV.W   #0x3e8, R11
+     26          	turnLeft(wait, drive);
+   \   000064   0D4B         MOV.W   R11, R13
+   \   000066   0C4A         MOV.W   R10, R12
+   \   000068   ........     CALLA   #turnLeft
+     27          
+     28          	strcpy(display_line[0], " ECE-306  ");
+   \   00006C   3D40....     MOV.W   #`?<Constant " ECE-306  ">`, R13
+   \   000070   3C40....     MOV.W   #display_line, R12
+   \   000074   ........     CALLA   #strcpy
+     29          	update_string(display_line[0], 0);
+   \   000078   0D43         MOV.W   #0x0, R13
+   \   00007A   ........     CALLA   #update_string
+     30          	strcpy(display_line[1], " Voltages ");
+   \   00007E   3D40....     MOV.W   #`?<Constant " Voltages ">`, R13
+   \   000082   3C40....     MOV.W   #display_line + 11, R12
+   \   000086   ........     CALLA   #strcpy
+     31          	update_string(display_line[1], 1);
+   \   00008A   1D43         MOV.W   #0x1, R13
+   \   00008C   3C40....     MOV.W   #display_line + 11, R12
+   \   000090   ........     CALLA   #update_string
+     32          	strcpy(display_line[2], "BAT   CONV");
+   \   000094   3D40....     MOV.W   #`?<Constant "BAT   CONV">`, R13
+   \   000098   3C40....     MOV.W   #display_line + 22, R12
+   \   00009C   ........     CALLA   #strcpy
+     33          	update_string(display_line[2], 2);
+   \   0000A0   2D43         MOV.W   #0x2, R13
+   \   0000A2   3C40....     MOV.W   #display_line + 22, R12
+   \   0000A6   ........     CALLA   #update_string
+     34          	strcpy(display_line[3], "          ");
+   \   0000AA   3D40....     MOV.W   #`?<Constant "          ">`, R13
+   \   0000AE   3C40....     MOV.W   #display_line + 33, R12
+   \   0000B2   ........     CALLA   #strcpy
+     35          	update_string(display_line[3], 3);
+   \   0000B6   3D400300     MOV.W   #0x3, R13
+   \   0000BA   3C40....     MOV.W   #display_line + 33, R12
+   \   0000BE   ........     CALLA   #update_string
+     36          	//  strcpy(display_line[3], "L    R    ");
+     37          	//  update_string(display_line[3], 3);
+     38          }
+   \   0000C2   1A17         POPM.W  #0x2, R11
+   \   0000C4   1001         RETA
+     39          
+
+   \                                 In  segment CODE, align 2
+     40          void driveFigureEight(void) {
+   \                     driveFigureEight:
+     41          	strcpy(display_line[0], " FIGURE-8 ");
+   \   000000   3D40....     MOV.W   #`?<Constant " FIGURE-8 ">`, R13
+   \   000004   3C40....     MOV.W   #display_line, R12
+   \   000008   ........     CALLA   #strcpy
+     42          	update_string(display_line[0], 0);
+   \   00000C   0D43         MOV.W   #0x0, R13
+   \   00000E   ........     CALLA   #update_string
+     43          	strcpy(display_line[1], "          ");
+   \   000012   3D40....     MOV.W   #`?<Constant "          ">`, R13
+   \   000016   3C40....     MOV.W   #display_line + 11, R12
+   \   00001A   ........     CALLA   #strcpy
+     44          	update_string(display_line[1], 1);
+   \   00001E   1D43         MOV.W   #0x1, R13
+   \   000020   3C40....     MOV.W   #display_line + 11, R12
+   \   000024   ........     CALLA   #update_string
+     45          	strcpy(display_line[2], "          ");
+   \   000028   3D40....     MOV.W   #`?<Constant "          ">`, R13
+   \   00002C   3C40....     MOV.W   #display_line + 22, R12
+   \   000030   ........     CALLA   #strcpy
+     46          	update_string(display_line[2], 2);
+   \   000034   2D43         MOV.W   #0x2, R13
+   \   000036   3C40....     MOV.W   #display_line + 22, R12
+   \   00003A   ........     CALLA   #update_string
+     47          	strcpy(display_line[3], "          ");
+   \   00003E   3D40....     MOV.W   #`?<Constant "          ">`, R13
+   \   000042   3C40....     MOV.W   #display_line + 33, R12
+   \   000046   ........     CALLA   #strcpy
+     48          	update_string(display_line[3], 3);
+   \   00004A   3D400300     MOV.W   #0x3, R13
+   \   00004E   3C40....     MOV.W   #display_line + 33, R12
+   \   000052   ........     CALLA   #update_string
+     49          	display_changed = 1;
+   \   000056   D243....     MOV.B   #0x1, &display_changed
+     50          
+     51          	
+     52          }
+   \   00005A   1001         RETA
+     53          
+     54          
+
+   \                                 In  segment CODE, align 2
+     55          void driveShapes(void) {
+   \                     driveShapes:
+     56          	switch (driveState) {
+   \   000000   5E42....     MOV.B   &driveState, R14
+   \   000004   7E804300     SUB.B   #0x43, R14
+   \   000008   0724         JEQ     ??driveShapes_1
+   \   00000A   7E800300     SUB.B   #0x3, R14
+   \   00000E   0724         JEQ     ??driveShapes_2
+   \   000010   7E800E00     SUB.B   #0xe, R14
+   \   000014   0724         JEQ     ??driveShapes_3
+   \   000016   1001         RETA
+     57          	case 'C':
+     58          		driveCircle();
+   \                     ??driveShapes_1:
+   \   000018   ........     CALLA   #driveCircle
+     59          		break;
+   \   00001C   1001         RETA
+     60          
+     61          	case 'F':
+     62          		driveFigureEight();
+   \                     ??driveShapes_2:
+   \   00001E   ........     CALLA   #driveFigureEight
+     63          		break;
+   \   000022   1001         RETA
+     64          
+     65          	case 'T':
+     66          		driveTriangle();
+   \                     ??driveShapes_3:
+   \   000024   ........     CALLA   #driveTriangle
+     67          		break;
+     68          
+     69          	default:
+     70          		break;
+     71          	}
+     72          }
+   \   000028   1001         RETA
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "  CIRCLE  ">`:
+   \   000000   202043495243 DC8 "  CIRCLE  "
+   \            4C45202000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "          ">`:
+   \   000000   202020202020 DC8 "          "
+   \            2020202000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant " ECE-306  ">`:
+   \   000000   204543452D33 DC8 " ECE-306  "
+   \            3036202000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant " Voltages ">`:
+   \   000000   20566F6C7461 DC8 " Voltages "
+   \            6765732000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "BAT   CONV">`:
+   \   000000   424154202020 DC8 "BAT   CONV"
+   \            434F4E5600  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant " FIGURE-8 ">`:
+   \   000000   204649475552 DC8 " FIGURE-8 "
+   \            452D382000  
+
+   Maximum stack usage in bytes:
+
+   CSTACK Function
+   ------ --------
+      8   driveCircle
+        8   -> strcpy
+        8   -> turnLeft
+        8   -> update_string
+      4   driveFigureEight
+        4   -> strcpy
+        4   -> update_string
+      4   driveShapes
+        4   -> driveCircle
+        4   -> driveFigureEight
+        4   -> driveTriangle
+
+
+   Segment part sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      11  ?<Constant "          ">
+      11  ?<Constant "  CIRCLE  ">
+      11  ?<Constant " ECE-306  ">
+      11  ?<Constant " FIGURE-8 ">
+      11  ?<Constant " Voltages ">
+      11  ?<Constant "BAT   CONV">
+     198  driveCircle
+      92  driveFigureEight
+      42  driveShapes
+
+ 
+ 332 bytes in segment CODE
+  66 bytes in segment DATA16_C
+ 
+ 332 bytes of CODE  memory
+  66 bytes of CONST memory
+
+Errors: none
+Warnings: none

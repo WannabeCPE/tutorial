@@ -1,0 +1,153 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V7.20.1.997/W32 for MSP430           08/Sep/2020  13:47:22
+# Copyright 1996-2020 IAR Systems AB.
+# PC-locked license - IAR Embedded Workbench for MSP430, 8K KickStart Edition 7.20
+#
+#    __rt_version  =  3
+#    __double_size =  32
+#    __reg_r4      =  free
+#    __reg_r5      =  free
+#    __pic         =  no
+#    __core        =  430X
+#    __data_model  =  small
+#    __code_model  =  large
+#    Source file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_03\init.c
+#    Command line  =  
+#        -f C:\Users\19196\AppData\Local\Temp\EWA692.tmp
+#        ("C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_03\init.c"
+#        -lC "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_03\Debug\List" -o
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_03\Debug\Obj" --no_cse --no_unroll --no_inline
+#        --no_code_motion --no_tbaa --debug -D__MSP430FR2355__ -e --double=32
+#        --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.4\430\lib\dlib\dl430xlsfn.h" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.4\430\" --core=430X --data_model=small
+#        -On --multiplier=32 --hw_workaround=CPU40 --code_model=large)
+#    Locale        =  English_USA.1252
+#    List file     =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_03\Debug\List\init.lst
+#    Object file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_03\Debug\Obj\init.r43
+#
+###############################################################################
+
+C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_03\init.c
+      1          //	Filename: init.c
+      2          //
+      3          //	Description: This file is used for Display Initialization. 
+      4          //	
+      5          //
+      6          //	Author: Cody Lane
+      7          //	Date: 08/30/2020
+      8          // 
+      9          //	Compiler: Built with IAR Embedded Workbench 7.20.1
+     10          
+     11          
+     12          
+     13          #include "macros.h"
+     14          #include  "functions.h"
+     15          #include  "msp430.h"
+     16          #include <string.h>
+     17          
+     18          // Global Variables
+     19          
+     20          extern char display_line[4][11];
+     21          extern char* display[4];
+     22          extern volatile unsigned char display_changed;
+     23          extern volatile unsigned char update_display;
+     24          extern volatile unsigned int update_display_count;
+     25          extern volatile unsigned int Time_Sequence;
+     26          extern volatile char one_time;
+     27          extern unsigned int wheel_on_count;
+     28          extern char wheels_on;
+     29          
+     30          
+     31          // This function initializes the LCD
+
+   \                                 In  segment CODE, align 2
+     32          void Init_Conditions(void) {
+   \                     Init_Conditions:
+   \   000000   0A12         PUSH.W  R10
+     33          	//------------------------------------------------------------------------------
+     34          	int i;
+     35          
+     36          	for (i = 0;i < 11;i++) {
+   \   000002   0A43         MOV.W   #0x0, R10
+   \                     ??Init_Conditions_0:
+   \   000004   3A900B00     CMP.W   #0xb, R10
+   \   000008   0A34         JGE     ??Init_Conditions_1
+     37          		display_line[0][i] = RESET_STATE;
+   \   00000A   CA43....     MOV.B   #0x0, display_line(R10)
+     38          		display_line[1][i] = RESET_STATE;
+   \   00000E   CA43....     MOV.B   #0x0, display_line + 11(R10)
+     39          		display_line[2][i] = RESET_STATE;
+   \   000012   CA43....     MOV.B   #0x0, display_line + 22(R10)
+     40          		display_line[3][i] = RESET_STATE;
+   \   000016   CA43....     MOV.B   #0x0, display_line + 33(R10)
+     41          	}
+   \   00001A   1A53         ADD.W   #0x1, R10
+   \   00001C   F33F         JMP     ??Init_Conditions_0
+     42          	display_line[0][10] = 0;
+   \                     ??Init_Conditions_1:
+   \   00001E   C243....     MOV.B   #0x0, &display_line + 10
+     43          	display_line[1][10] = 0;
+   \   000022   C243....     MOV.B   #0x0, &display_line + 21
+     44          	display_line[2][10] = 0;
+   \   000026   C243....     MOV.B   #0x0, &display_line + 32
+     45          	display_line[3][10] = 0;
+   \   00002A   C243....     MOV.B   #0x0, &display_line + 43
+     46          
+     47          	display[0] = &display_line[0][0];
+   \   00002E   B240........ MOV.W   #display_line, &display
+     48          	display[1] = &display_line[1][0];
+   \   000034   B240........ MOV.W   #display_line + 11, &display + 2
+     49          	display[2] = &display_line[2][0];
+   \   00003A   B240........ MOV.W   #display_line + 22, &display + 4
+     50          	display[3] = &display_line[3][0];
+   \   000040   B240........ MOV.W   #display_line + 33, &display + 6
+     51          	update_display = 0;
+   \   000046   C243....     MOV.B   #0x0, &update_display
+     52          	update_display_count = 0;
+   \   00004A   8243....     MOV.W   #0x0, &update_display_count
+     53          
+     54          	// Interrupts are disabled by default, enable them.
+     55          	enable_interrupts();
+   \   00004E   ........     CALLA   #enable_interrupts
+     56          
+     57          	wheels_on = 0;
+   \   000052   C243....     MOV.B   #0x0, &wheels_on
+     58          	wheel_on_count = 0;
+   \   000056   8243....     MOV.W   #0x0, &wheel_on_count
+     59          	//------------------------------------------------------------------------------
+     60          }
+   \   00005A   3A41         POP.W   R10
+   \   00005C   1001         RETA
+     61          
+     62          
+
+   Maximum stack usage in bytes:
+
+   CSTACK Function
+   ------ --------
+      6   Init_Conditions
+        6   -> enable_interrupts
+
+
+   Segment part sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      94  Init_Conditions
+
+ 
+ 94 bytes in segment CODE
+ 
+ 94 bytes of CODE memory
+
+Errors: none
+Warnings: none

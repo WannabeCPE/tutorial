@@ -1,0 +1,805 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V7.20.1.997/W32 for MSP430           23/Oct/2020  20:22:20
+# Copyright 1996-2020 IAR Systems AB.
+# PC-locked license - IAR Embedded Workbench for MSP430, 8K KickStart Edition 7.20
+#
+#    __rt_version  =  3
+#    __double_size =  32
+#    __reg_r4      =  free
+#    __reg_r5      =  free
+#    __pic         =  no
+#    __core        =  430X
+#    __data_model  =  small
+#    __code_model  =  large
+#    Source file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_07\adc.c
+#    Command line  =  
+#        -f C:\Users\19196\AppData\Local\Temp\EW1DDC.tmp
+#        ("C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_07\adc.c"
+#        -lC "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_07\Debug\List" -o
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_07\Debug\Obj" --no_cse --no_unroll --no_inline
+#        --no_code_motion --no_tbaa --debug -D__MSP430FR2355__ -e --double=32
+#        --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.4\430\lib\dlib\dl430xlsfn.h" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.4\430\" --core=430X --data_model=small
+#        -On --multiplier=32 --hw_workaround=CPU40 --code_model=large)
+#    Locale        =  English_USA.1252
+#    List file     =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_07\Debug\List\adc.lst
+#    Object file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_07\Debug\Obj\adc.r43
+#
+###############################################################################
+
+C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_07\adc.c
+      1          //------------------------------------------------------------------------------
+      2          //
+      3          //  Description: This file contains the configuation for the ADC as well as conversion functions
+      4          //
+      5          //
+      6          //  Cody Lane
+      7          //  Sep 2020
+      8          //  Built with IAR Embedded Workbench Version: V7.20.1 
+      9          //------------------------------------------------------------------------------
+     10          
+     11          //------------------------------------------------------------------------------
+     12          #include  "msp430.h"
+
+   \                                 In  segment DATA16_AN, at 0x700
+   \   union <unnamed> _A_ADCCTL0_L
+   \                     _A_ADCCTL0_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x702
+   \   union <unnamed> _A_ADCCTL1_L
+   \                     _A_ADCCTL1_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x704
+   \   union <unnamed> _A_ADCCTL2_L
+   \                     _A_ADCCTL2_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x70a
+   \   union <unnamed> _A_ADCMCTL0_L
+   \                     _A_ADCMCTL0_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x71a
+   \   union <unnamed> _A_ADCIE_L
+   \                     _A_ADCIE_L:
+   \   000000                DS8 2
+     13          #include  "functions.h"
+     14          #include <string.h>
+     15          #include  "macros.h"
+     16          
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     17          char adc_char[5];
+   \                     adc_char:
+   \   000000                DS8 5
+     18          extern char display_line[4][11];
+     19          extern volatile unsigned char update_display;
+     20          extern volatile unsigned char display_changed;
+     21          extern char emitter_state;
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     22          char emitter_state_on[11] = { "Emitter ON" };
+   \                     emitter_state_on:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for emitter_state_on>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     23          char emitter_state_off[11] = { "EmitterOFF" };
+   \                     emitter_state_off:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for emitter_state_off>`
+     24          
+     25          
+
+   \                                 In  segment CODE, align 2
+     26          void Init_ADC(void) {
+   \                     Init_ADC:
+     27          	//------------------------------------------------------------------------------
+     28          	// V_DETECT_L (0x04) // Pin 2 A2
+     29          	// V_DETECT_R (0x08) // Pin 3 A3
+     30          	// V_THUMB (0x20) // Pin 5 A5
+     31          	//------------------------------------------------------------------------------
+     32          	// ADCCTL0 Register
+     33          	ADCCTL0 = RESET_STATE; // Reset
+   \   000000   82430007     MOV.W   #0x0, &0x700
+     34          	ADCCTL0 |= ADCSHT_2; // 16 ADC clocks
+   \   000004   B2D000020007 BIS.W   #0x200, &0x700
+     35          	ADCCTL0 |= ADCMSC; // MSC
+   \   00000A   B2D080000007 BIS.W   #0x80, &0x700
+     36          	ADCCTL0 |= ADCON; // ADC ON
+   \   000010   B2D010000007 BIS.W   #0x10, &0x700
+     37          	// ADCCTL1 Register
+     38          	ADCCTL1 = RESET_STATE; // Reset
+   \   000016   82430207     MOV.W   #0x0, &0x702
+     39          	ADCCTL1 |= ADCSHS_0; // 00b = ADCSC bit
+   \   00001A   924202070207 MOV.W   &0x702, &0x702
+     40          	ADCCTL1 |= ADCSHP; // ADC sample-and-hold SAMPCON signal from sampling timer.
+   \   000020   B2D000020207 BIS.W   #0x200, &0x702
+     41          	ADCCTL1 &= ~ADCISSH; // ADC invert signal sample-and-hold.
+   \   000026   B2C000010207 BIC.W   #0x100, &0x702
+     42          	ADCCTL1 |= ADCDIV_0; // ADC clock divider - 000b = Divide by 1
+   \   00002C   924202070207 MOV.W   &0x702, &0x702
+     43          	ADCCTL1 |= ADCSSEL_0; // ADC clock MODCLK
+   \   000032   924202070207 MOV.W   &0x702, &0x702
+     44          	ADCCTL1 |= ADCCONSEQ_0; // ADC conversion sequence 00b = Single-channel single-conversion
+   \   000038   924202070207 MOV.W   &0x702, &0x702
+     45          	// ADCCTL1 & ADCBUSY identifies a conversion is in process
+     46          	// ADCCTL2 Register
+     47          	ADCCTL2 = RESET_STATE; // Reset
+   \   00003E   82430407     MOV.W   #0x0, &0x704
+     48          	ADCCTL2 |= ADCPDIV0; // ADC pre-divider 00b = Pre-divide by 1
+   \   000042   B2D000010407 BIS.W   #0x100, &0x704
+     49          	ADCCTL2 |= ADCRES_2; // ADC resolution 10b = 12 bit (14 clock cycle conversion time)
+   \   000048   B2D020000407 BIS.W   #0x20, &0x704
+     50          	ADCCTL2 &= ~ADCDF; // ADC data read-back format 0b = Binary unsigned.
+   \   00004E   B2C20407     BIC.W   #0x8, &0x704
+     51          	ADCCTL2 &= ~ADCSR; // ADC sampling rate 0b = ADC buffer supports up to 200 ksps
+   \   000052   A2C20407     BIC.W   #0x4, &0x704
+     52          	// ADCMCTL0 Register
+     53          	ADCMCTL0 |= ADCSREF_0; // VREF - 000b = {VR+ = AVCC and VR– = AVSS }
+   \   000056   92420A070A07 MOV.W   &0x70a, &0x70a
+     54          	ADCMCTL0 |= ADCINCH_5; // V_THUMB (0x20) Pin 5 A5
+   \   00005C   B2D005000A07 BIS.W   #0x5, &0x70a
+     55          	ADCIE |= ADCIE0; // Enable ADC conv complete interrupt
+   \   000062   92D31A07     BIS.W   #0x1, &0x71a
+     56          	ADCCTL0 |= ADCENC; // ADC enable conversion.
+   \   000066   A2D30007     BIS.W   #0x2, &0x700
+     57          	ADCCTL0 |= ADCSC; // ADC start conversion.
+   \   00006A   92D30007     BIS.W   #0x1, &0x700
+     58          }
+   \   00006E   1001         RETA
+   \   000070                REQUIRE _A_ADCCTL0_L
+   \   000070                REQUIRE _A_ADCCTL1_L
+   \   000070                REQUIRE _A_ADCCTL2_L
+   \   000070                REQUIRE _A_ADCMCTL0_L
+   \   000070                REQUIRE _A_ADCIE_L
+     59          
+     60          //------------------------------------------------------------------------------
+     61          //******************************************************************************
+     62          // Hex to BCD Conversion
+     63          // Convert a Hex number to a BCD for display on an LCD or monitor
+     64          //
+     65          //------------------------------------------------------------------------------
+
+   \                                 In  segment CODE, align 2
+     66          void HEXtoBCD(int hex_value) {
+   \                     HEXtoBCD:
+     67          	int value = RESET_STATE;
+   \   000000   0F43         MOV.W   #0x0, R15
+     68          	adc_char[0] = '0';
+   \   000002   F2403000.... MOV.B   #0x30, &adc_char
+     69          	adc_char[1] = '0';
+   \   000008   F2403000.... MOV.B   #0x30, &adc_char + 1
+     70          	adc_char[2] = '0';
+   \   00000E   F2403000.... MOV.B   #0x30, &adc_char + 2
+     71          	adc_char[3] = '0';
+   \   000014   F2403000.... MOV.B   #0x30, &adc_char + 3
+     72          	while (hex_value > 999) {
+   \                     ??HEXtoBCD_0:
+   \   00001A   3C90E803     CMP.W   #0x3e8, R12
+   \   00001E   0C38         JL      ??HEXtoBCD_3
+     73          		hex_value = hex_value - 1000;
+   \   000020   3C5018FC     ADD.W   #0xfc18, R12
+     74          		value = value + 1;
+   \   000024   1F53         ADD.W   #0x1, R15
+     75          		adc_char[0] = 0x30 + value;
+   \   000026   0E12         PUSH.W  R14
+   \   000028   C14F0000     MOV.B   R15, 0(SP)
+   \   00002C   3E41         POP.W   R14
+   \   00002E   7E503000     ADD.B   #0x30, R14
+   \   000032   C24E....     MOV.B   R14, &adc_char
+   \   000036   F13F         JMP     ??HEXtoBCD_0
+     76          	}
+     77          	value = RESET_STATE;
+   \                     ??HEXtoBCD_3:
+   \   000038   0F43         MOV.W   #0x0, R15
+     78          	while (hex_value > 99) {
+   \                     ??HEXtoBCD_1:
+   \   00003A   3C906400     CMP.W   #0x64, R12
+   \   00003E   0C38         JL      ??HEXtoBCD_4
+     79          		hex_value = hex_value - 100;
+   \   000040   3C509CFF     ADD.W   #0xff9c, R12
+     80          		value = value + 1;
+   \   000044   1F53         ADD.W   #0x1, R15
+     81          		adc_char[1] = 0x30 + value;
+   \   000046   0E12         PUSH.W  R14
+   \   000048   C14F0000     MOV.B   R15, 0(SP)
+   \   00004C   3E41         POP.W   R14
+   \   00004E   7E503000     ADD.B   #0x30, R14
+   \   000052   C24E....     MOV.B   R14, &adc_char + 1
+   \   000056   F13F         JMP     ??HEXtoBCD_1
+     82          	}
+     83          	value = RESET_STATE;
+   \                     ??HEXtoBCD_4:
+   \   000058   0F43         MOV.W   #0x0, R15
+     84          	while (hex_value > 9) {
+   \                     ??HEXtoBCD_2:
+   \   00005A   3C900A00     CMP.W   #0xa, R12
+   \   00005E   0C38         JL      ??HEXtoBCD_5
+     85          		hex_value = hex_value - 10;
+   \   000060   3C50F6FF     ADD.W   #0xfff6, R12
+     86          		value = value + 1;
+   \   000064   1F53         ADD.W   #0x1, R15
+     87          		adc_char[2] = 0x30 + value;
+   \   000066   0E12         PUSH.W  R14
+   \   000068   C14F0000     MOV.B   R15, 0(SP)
+   \   00006C   3E41         POP.W   R14
+   \   00006E   7E503000     ADD.B   #0x30, R14
+   \   000072   C24E....     MOV.B   R14, &adc_char + 2
+   \   000076   F13F         JMP     ??HEXtoBCD_2
+     88          	}
+     89          	adc_char[3] = 0x30 + hex_value;
+   \                     ??HEXtoBCD_5:
+   \   000078   0E12         PUSH.W  R14
+   \   00007A   C14C0000     MOV.B   R12, 0(SP)
+   \   00007E   3E41         POP.W   R14
+   \   000080   7E503000     ADD.B   #0x30, R14
+   \   000084   C24E....     MOV.B   R14, &adc_char + 3
+     90          
+     91          }
+   \   000088   1001         RETA
+     92          
+     93          
+     94          
+
+   \                                 In  segment CODE, align 2
+     95          void adc_white_calibration(char location) {
+   \                     adc_white_calibration:
+   \   000000   1B15         PUSHM.W #0x2, R11
+   \   000002   B1000C00     SUBA    #0xc, SP
+   \   000006   4A4C         MOV.B   R12, R10
+     96          	int i;
+     97          	char white_calibration_display[11] = { "           " };
+   \   000008   3F40....     MOV.W   #`?<Constant "           ">`, R15
+   \   00000C   B14F0000     MOV.W   @R15+, 0(SP)
+   \   000010   B14F0200     MOV.W   @R15+, 0x2(SP)
+   \   000014   B14F0400     MOV.W   @R15+, 0x4(SP)
+   \   000018   B14F0600     MOV.W   @R15+, 0x6(SP)
+   \   00001C   B14F0800     MOV.W   @R15+, 0x8(SP)
+   \   000020   B14F0A00     MOV.W   @R15+, 0xa(SP)
+     98          	for (i = location; i < 10; i++) {
+   \   000024   4A4A         MOV.B   R10, R10
+   \   000026   0B4A         MOV.W   R10, R11
+   \                     ??adc_white_calibration_0:
+   \   000028   3B900A00     CMP.W   #0xa, R11
+   \   00002C   0A34         JGE     ??adc_white_calibration_1
+     99          		white_calibration_display[i] = adc_char[i - location];
+   \   00002E   4A4A         MOV.B   R10, R10
+   \   000030   0F4B         MOV.W   R11, R15
+   \   000032   0F8A         SUB.W   R10, R15
+   \   000034   0E4B         MOV.W   R11, R14
+   \   000036   0E51         ADD.W   SP, R14
+   \   000038   DE4F....0000 MOV.B   adc_char(R15), 0(R14)
+    100          	}
+   \   00003E   1B53         ADD.W   #0x1, R11
+   \   000040   F33F         JMP     ??adc_white_calibration_0
+    101          	if (update_display) {
+   \                     ??adc_white_calibration_1:
+   \   000042   C293....     CMP.B   #0x0, &update_display
+   \   000046   3124         JEQ     ??adc_white_calibration_2
+    102          		update_display = RESET_STATE;
+   \   000048   C243....     MOV.B   #0x0, &update_display
+    103          		if (display_changed) {
+   \   00004C   C293....     CMP.B   #0x0, &display_changed
+   \   000050   2C24         JEQ     ??adc_white_calibration_2
+    104          			display_changed = RESET_STATE;
+   \   000052   C243....     MOV.B   #0x0, &display_changed
+    105          			strcpy(display_line[0], "  WHITE    ");
+   \   000056   3D40....     MOV.W   #`?<Constant "  WHITE    ">`, R13
+   \   00005A   3C40....     MOV.W   #display_line, R12
+   \   00005E   ........     CALLA   #strcpy
+    106          			update_string(display_line[0], 0);
+   \   000062   0D43         MOV.W   #0x0, R13
+   \   000064   ........     CALLA   #update_string
+    107          			strcpy(display_line[1], "CALIBRATE ");
+   \   000068   3D40....     MOV.W   #`?<Constant "CALIBRATE ">`, R13
+   \   00006C   3C40....     MOV.W   #display_line + 11, R12
+   \   000070   ........     CALLA   #strcpy
+    108          			update_string(display_line[1], 1);
+   \   000074   1D43         MOV.W   #0x1, R13
+   \   000076   3C40....     MOV.W   #display_line + 11, R12
+   \   00007A   ........     CALLA   #update_string
+    109          			strcpy(display_line[2], "  VALUE:  ");
+   \   00007E   3D40....     MOV.W   #`?<Constant "  VALUE:  ">`, R13
+   \   000082   3C40....     MOV.W   #display_line + 22, R12
+   \   000086   ........     CALLA   #strcpy
+    110          			update_string(display_line[2], 2);
+   \   00008A   2D43         MOV.W   #0x2, R13
+   \   00008C   3C40....     MOV.W   #display_line + 22, R12
+   \   000090   ........     CALLA   #update_string
+    111          			strcpy(display_line[3], white_calibration_display);
+   \   000094   0D41         MOV.W   SP, R13
+   \   000096   3C40....     MOV.W   #display_line + 33, R12
+   \   00009A   ........     CALLA   #strcpy
+    112          			update_string(display_line[3], 3);
+   \   00009E   3D400300     MOV.W   #0x3, R13
+   \   0000A2   3C40....     MOV.W   #display_line + 33, R12
+   \   0000A6   ........     CALLA   #update_string
+    113          		};
+    114          	}
+    115          }
+   \                     ??adc_white_calibration_2:
+   \   0000AA   A1000C00     ADDA    #0xc, SP
+   \   0000AE   1A17         POPM.W  #0x2, R11
+   \   0000B0   1001         RETA
+    116          
+
+   \                                 In  segment CODE, align 2
+    117          void adc_black_calibration(char location) {
+   \                     adc_black_calibration:
+   \   000000   1B15         PUSHM.W #0x2, R11
+   \   000002   B1000C00     SUBA    #0xc, SP
+   \   000006   4A4C         MOV.B   R12, R10
+    118          	int i;
+    119          	char black_calibration_display[11] = { "           " };
+   \   000008   3F40....     MOV.W   #`?<Constant "           ">_1`, R15
+   \   00000C   B14F0000     MOV.W   @R15+, 0(SP)
+   \   000010   B14F0200     MOV.W   @R15+, 0x2(SP)
+   \   000014   B14F0400     MOV.W   @R15+, 0x4(SP)
+   \   000018   B14F0600     MOV.W   @R15+, 0x6(SP)
+   \   00001C   B14F0800     MOV.W   @R15+, 0x8(SP)
+   \   000020   B14F0A00     MOV.W   @R15+, 0xa(SP)
+    120          	for (i = location; i < 10; i++) {
+   \   000024   4A4A         MOV.B   R10, R10
+   \   000026   0B4A         MOV.W   R10, R11
+   \                     ??adc_black_calibration_0:
+   \   000028   3B900A00     CMP.W   #0xa, R11
+   \   00002C   0A34         JGE     ??adc_black_calibration_1
+    121          		black_calibration_display[i] = adc_char[i - location];
+   \   00002E   4A4A         MOV.B   R10, R10
+   \   000030   0F4B         MOV.W   R11, R15
+   \   000032   0F8A         SUB.W   R10, R15
+   \   000034   0E4B         MOV.W   R11, R14
+   \   000036   0E51         ADD.W   SP, R14
+   \   000038   DE4F....0000 MOV.B   adc_char(R15), 0(R14)
+    122          	}
+   \   00003E   1B53         ADD.W   #0x1, R11
+   \   000040   F33F         JMP     ??adc_black_calibration_0
+    123          	if (update_display) {
+   \                     ??adc_black_calibration_1:
+   \   000042   C293....     CMP.B   #0x0, &update_display
+   \   000046   3124         JEQ     ??adc_black_calibration_2
+    124          		update_display = RESET_STATE;
+   \   000048   C243....     MOV.B   #0x0, &update_display
+    125          		if (display_changed) {
+   \   00004C   C293....     CMP.B   #0x0, &display_changed
+   \   000050   2C24         JEQ     ??adc_black_calibration_2
+    126          			display_changed = RESET_STATE;
+   \   000052   C243....     MOV.B   #0x0, &display_changed
+    127          			strcpy(display_line[0], "  BLACK    ");
+   \   000056   3D40....     MOV.W   #`?<Constant "  BLACK    ">`, R13
+   \   00005A   3C40....     MOV.W   #display_line, R12
+   \   00005E   ........     CALLA   #strcpy
+    128          			update_string(display_line[0], 0);
+   \   000062   0D43         MOV.W   #0x0, R13
+   \   000064   ........     CALLA   #update_string
+    129          			strcpy(display_line[1], "CALIBRATE ");
+   \   000068   3D40....     MOV.W   #`?<Constant "CALIBRATE ">`, R13
+   \   00006C   3C40....     MOV.W   #display_line + 11, R12
+   \   000070   ........     CALLA   #strcpy
+    130          			update_string(display_line[1], 1);
+   \   000074   1D43         MOV.W   #0x1, R13
+   \   000076   3C40....     MOV.W   #display_line + 11, R12
+   \   00007A   ........     CALLA   #update_string
+    131          			strcpy(display_line[2], "  VALUE:  ");
+   \   00007E   3D40....     MOV.W   #`?<Constant "  VALUE:  ">`, R13
+   \   000082   3C40....     MOV.W   #display_line + 22, R12
+   \   000086   ........     CALLA   #strcpy
+    132          			update_string(display_line[2], 2);
+   \   00008A   2D43         MOV.W   #0x2, R13
+   \   00008C   3C40....     MOV.W   #display_line + 22, R12
+   \   000090   ........     CALLA   #update_string
+    133          			strcpy(display_line[3], black_calibration_display);
+   \   000094   0D41         MOV.W   SP, R13
+   \   000096   3C40....     MOV.W   #display_line + 33, R12
+   \   00009A   ........     CALLA   #strcpy
+    134          			update_string(display_line[3], 3);
+   \   00009E   3D400300     MOV.W   #0x3, R13
+   \   0000A2   3C40....     MOV.W   #display_line + 33, R12
+   \   0000A6   ........     CALLA   #update_string
+    135          		};
+    136          	}
+    137          }
+   \                     ??adc_black_calibration_2:
+   \   0000AA   A1000C00     ADDA    #0xc, SP
+   \   0000AE   1A17         POPM.W  #0x2, R11
+   \   0000B0   1001         RETA
+    138          
+
+   \                                 In  segment CODE, align 2
+    139          void adc_line2(char location) {
+   \                     adc_line2:
+   \   000000   1B15         PUSHM.W #0x2, R11
+   \   000002   B1000C00     SUBA    #0xc, SP
+   \   000006   4A4C         MOV.B   R12, R10
+    140          	int i;
+    141          	char V_Detect_Left_display[11] = { "V_DL:     " };
+   \   000008   3F40....     MOV.W   #`?<Constant "V_DL:     ">`, R15
+   \   00000C   B14F0000     MOV.W   @R15+, 0(SP)
+   \   000010   B14F0200     MOV.W   @R15+, 0x2(SP)
+   \   000014   B14F0400     MOV.W   @R15+, 0x4(SP)
+   \   000018   B14F0600     MOV.W   @R15+, 0x6(SP)
+   \   00001C   B14F0800     MOV.W   @R15+, 0x8(SP)
+   \   000020   B14F0A00     MOV.W   @R15+, 0xa(SP)
+    142          	
+    143          	for (i = location; i < 10; i++) {
+   \   000024   4A4A         MOV.B   R10, R10
+   \   000026   0B4A         MOV.W   R10, R11
+   \                     ??adc_line2_0:
+   \   000028   3B900A00     CMP.W   #0xa, R11
+   \   00002C   0A34         JGE     ??adc_line2_2
+    144          		V_Detect_Left_display[i] = adc_char[i - location];
+   \   00002E   4A4A         MOV.B   R10, R10
+   \   000030   0F4B         MOV.W   R11, R15
+   \   000032   0F8A         SUB.W   R10, R15
+   \   000034   0E4B         MOV.W   R11, R14
+   \   000036   0E51         ADD.W   SP, R14
+   \   000038   DE4F....0000 MOV.B   adc_char(R15), 0(R14)
+    145          	}
+   \   00003E   1B53         ADD.W   #0x1, R11
+   \   000040   F33F         JMP     ??adc_line2_0
+    146          	if (update_display) {
+   \                     ??adc_line2_2:
+   \   000042   C293....     CMP.B   #0x0, &update_display
+   \   000046   2724         JEQ     ??adc_line2_3
+    147          		update_display = RESET_STATE;
+   \   000048   C243....     MOV.B   #0x0, &update_display
+    148          		if (display_changed) {
+   \   00004C   C293....     CMP.B   #0x0, &display_changed
+   \   000050   2224         JEQ     ??adc_line2_3
+    149          			display_changed = RESET_STATE;
+   \   000052   C243....     MOV.B   #0x0, &display_changed
+    150          			if (emitter_state) {
+   \   000056   C293....     CMP.B   #0x0, &emitter_state
+   \   00005A   0A24         JEQ     ??adc_line2_4
+    151          				strcpy(display_line[0], emitter_state_on);
+   \   00005C   3D40....     MOV.W   #emitter_state_on, R13
+   \   000060   3C40....     MOV.W   #display_line, R12
+   \   000064   ........     CALLA   #strcpy
+    152          				update_string(display_line[0], 0);
+   \   000068   0D43         MOV.W   #0x0, R13
+   \   00006A   ........     CALLA   #update_string
+   \   00006E   093C         JMP     ??adc_line2_1
+    153          			}
+    154          			else {
+    155          				strcpy(display_line[0], emitter_state_off);
+   \                     ??adc_line2_4:
+   \   000070   3D40....     MOV.W   #emitter_state_off, R13
+   \   000074   3C40....     MOV.W   #display_line, R12
+   \   000078   ........     CALLA   #strcpy
+    156          				update_string(display_line[0], 0);
+   \   00007C   0D43         MOV.W   #0x0, R13
+   \   00007E   ........     CALLA   #update_string
+    157          			}
+    158          			strcpy(display_line[1], V_Detect_Left_display);
+   \                     ??adc_line2_1:
+   \   000082   0D41         MOV.W   SP, R13
+   \   000084   3C40....     MOV.W   #display_line + 11, R12
+   \   000088   ........     CALLA   #strcpy
+    159          			update_string(display_line[1], 1);
+   \   00008C   1D43         MOV.W   #0x1, R13
+   \   00008E   3C40....     MOV.W   #display_line + 11, R12
+   \   000092   ........     CALLA   #update_string
+    160          		}
+    161          	}
+    162          
+    163          }
+   \                     ??adc_line2_3:
+   \   000096   A1000C00     ADDA    #0xc, SP
+   \   00009A   1A17         POPM.W  #0x2, R11
+   \   00009C   1001         RETA
+
+   \                                 In  segment CODE, align 2
+    164          void adc_line3(char location) {
+   \                     adc_line3:
+   \   000000   1B15         PUSHM.W #0x2, R11
+   \   000002   B1000C00     SUBA    #0xc, SP
+   \   000006   4A4C         MOV.B   R12, R10
+    165          	int i;
+    166          	char V_Detect_Right_display[11] = { "V_DR:     " };
+   \   000008   3F40....     MOV.W   #`?<Constant "V_DR:     ">`, R15
+   \   00000C   B14F0000     MOV.W   @R15+, 0(SP)
+   \   000010   B14F0200     MOV.W   @R15+, 0x2(SP)
+   \   000014   B14F0400     MOV.W   @R15+, 0x4(SP)
+   \   000018   B14F0600     MOV.W   @R15+, 0x6(SP)
+   \   00001C   B14F0800     MOV.W   @R15+, 0x8(SP)
+   \   000020   B14F0A00     MOV.W   @R15+, 0xa(SP)
+    167          
+    168          	for (i = location; i < 10; i++) {
+   \   000024   4A4A         MOV.B   R10, R10
+   \   000026   0B4A         MOV.W   R10, R11
+   \                     ??adc_line3_0:
+   \   000028   3B900A00     CMP.W   #0xa, R11
+   \   00002C   0A34         JGE     ??adc_line3_2
+    169          		V_Detect_Right_display[i] = adc_char[i - location];
+   \   00002E   4A4A         MOV.B   R10, R10
+   \   000030   0F4B         MOV.W   R11, R15
+   \   000032   0F8A         SUB.W   R10, R15
+   \   000034   0E4B         MOV.W   R11, R14
+   \   000036   0E51         ADD.W   SP, R14
+   \   000038   DE4F....0000 MOV.B   adc_char(R15), 0(R14)
+    170          	}
+   \   00003E   1B53         ADD.W   #0x1, R11
+   \   000040   F33F         JMP     ??adc_line3_0
+    171          	if (update_display) {
+   \                     ??adc_line3_2:
+   \   000042   C293....     CMP.B   #0x0, &update_display
+   \   000046   2724         JEQ     ??adc_line3_3
+    172          		update_display = RESET_STATE;
+   \   000048   C243....     MOV.B   #0x0, &update_display
+    173          		if (display_changed) {
+   \   00004C   C293....     CMP.B   #0x0, &display_changed
+   \   000050   2224         JEQ     ??adc_line3_3
+    174          			display_changed = RESET_STATE;
+   \   000052   C243....     MOV.B   #0x0, &display_changed
+    175          			if (emitter_state) {
+   \   000056   C293....     CMP.B   #0x0, &emitter_state
+   \   00005A   0A24         JEQ     ??adc_line3_4
+    176          				strcpy(display_line[0], emitter_state_on);
+   \   00005C   3D40....     MOV.W   #emitter_state_on, R13
+   \   000060   3C40....     MOV.W   #display_line, R12
+   \   000064   ........     CALLA   #strcpy
+    177          				update_string(display_line[0], 0);
+   \   000068   0D43         MOV.W   #0x0, R13
+   \   00006A   ........     CALLA   #update_string
+   \   00006E   093C         JMP     ??adc_line3_1
+    178          			}
+    179          			else {
+    180          				strcpy(display_line[0], emitter_state_off);
+   \                     ??adc_line3_4:
+   \   000070   3D40....     MOV.W   #emitter_state_off, R13
+   \   000074   3C40....     MOV.W   #display_line, R12
+   \   000078   ........     CALLA   #strcpy
+    181          				update_string(display_line[0], 0);
+   \   00007C   0D43         MOV.W   #0x0, R13
+   \   00007E   ........     CALLA   #update_string
+    182          			}
+    183          			strcpy(display_line[2], V_Detect_Right_display);
+   \                     ??adc_line3_1:
+   \   000082   0D41         MOV.W   SP, R13
+   \   000084   3C40....     MOV.W   #display_line + 22, R12
+   \   000088   ........     CALLA   #strcpy
+    184          			update_string(display_line[2], 2);
+   \   00008C   2D43         MOV.W   #0x2, R13
+   \   00008E   3C40....     MOV.W   #display_line + 22, R12
+   \   000092   ........     CALLA   #update_string
+    185          		}
+    186          	}
+    187          }
+   \                     ??adc_line3_3:
+   \   000096   A1000C00     ADDA    #0xc, SP
+   \   00009A   1A17         POPM.W  #0x2, R11
+   \   00009C   1001         RETA
+
+   \                                 In  segment CODE, align 2
+    188          void adc_line4(char location) {
+   \                     adc_line4:
+   \   000000   1B15         PUSHM.W #0x2, R11
+   \   000002   B1000C00     SUBA    #0xc, SP
+   \   000006   4A4C         MOV.B   R12, R10
+    189          	int i;
+    190          	char V_Thumb_display[11] = { "V_TH:     " };
+   \   000008   3F40....     MOV.W   #`?<Constant "V_TH:     ">`, R15
+   \   00000C   B14F0000     MOV.W   @R15+, 0(SP)
+   \   000010   B14F0200     MOV.W   @R15+, 0x2(SP)
+   \   000014   B14F0400     MOV.W   @R15+, 0x4(SP)
+   \   000018   B14F0600     MOV.W   @R15+, 0x6(SP)
+   \   00001C   B14F0800     MOV.W   @R15+, 0x8(SP)
+   \   000020   B14F0A00     MOV.W   @R15+, 0xa(SP)
+    191          
+    192          	for (i = location; i < 10; i++) {
+   \   000024   4A4A         MOV.B   R10, R10
+   \   000026   0B4A         MOV.W   R10, R11
+   \                     ??adc_line4_0:
+   \   000028   3B900A00     CMP.W   #0xa, R11
+   \   00002C   0A34         JGE     ??adc_line4_2
+    193          		V_Thumb_display[i] = adc_char[i - location];
+   \   00002E   4A4A         MOV.B   R10, R10
+   \   000030   0F4B         MOV.W   R11, R15
+   \   000032   0F8A         SUB.W   R10, R15
+   \   000034   0E4B         MOV.W   R11, R14
+   \   000036   0E51         ADD.W   SP, R14
+   \   000038   DE4F....0000 MOV.B   adc_char(R15), 0(R14)
+    194          	}
+   \   00003E   1B53         ADD.W   #0x1, R11
+   \   000040   F33F         JMP     ??adc_line4_0
+    195          
+    196          	if (update_display) {
+   \                     ??adc_line4_2:
+   \   000042   C293....     CMP.B   #0x0, &update_display
+   \   000046   2824         JEQ     ??adc_line4_3
+    197          		update_display = RESET_STATE;
+   \   000048   C243....     MOV.B   #0x0, &update_display
+    198          		if (display_changed) {
+   \   00004C   C293....     CMP.B   #0x0, &display_changed
+   \   000050   2324         JEQ     ??adc_line4_3
+    199          			display_changed = RESET_STATE;
+   \   000052   C243....     MOV.B   #0x0, &display_changed
+    200          			if (emitter_state) {
+   \   000056   C293....     CMP.B   #0x0, &emitter_state
+   \   00005A   0A24         JEQ     ??adc_line4_4
+    201          				strcpy(display_line[0], emitter_state_on);
+   \   00005C   3D40....     MOV.W   #emitter_state_on, R13
+   \   000060   3C40....     MOV.W   #display_line, R12
+   \   000064   ........     CALLA   #strcpy
+    202          				update_string(display_line[0], 0);
+   \   000068   0D43         MOV.W   #0x0, R13
+   \   00006A   ........     CALLA   #update_string
+   \   00006E   093C         JMP     ??adc_line4_1
+    203          			}
+    204          			else {
+    205          				strcpy(display_line[0], emitter_state_off);
+   \                     ??adc_line4_4:
+   \   000070   3D40....     MOV.W   #emitter_state_off, R13
+   \   000074   3C40....     MOV.W   #display_line, R12
+   \   000078   ........     CALLA   #strcpy
+    206          				update_string(display_line[0], 0);
+   \   00007C   0D43         MOV.W   #0x0, R13
+   \   00007E   ........     CALLA   #update_string
+    207          			}
+    208          			strcpy(display_line[3], V_Thumb_display);
+   \                     ??adc_line4_1:
+   \   000082   0D41         MOV.W   SP, R13
+   \   000084   3C40....     MOV.W   #display_line + 33, R12
+   \   000088   ........     CALLA   #strcpy
+    209          			update_string(display_line[3], 3);
+   \   00008C   3D400300     MOV.W   #0x3, R13
+   \   000090   3C40....     MOV.W   #display_line + 33, R12
+   \   000094   ........     CALLA   #update_string
+    210          		}
+    211          	}
+    212          }
+   \                     ??adc_line4_3:
+   \   000098   A1000C00     ADDA    #0xc, SP
+   \   00009C   1A17         POPM.W  #0x2, R11
+   \   00009E   1001         RETA
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for emitter_state_on>`:
+   \   000000   456D69747465 DC8 "Emitter ON"
+   \            72204F4E00  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for emitter_state_off>`:
+   \   000000   456D69747465 DC8 "EmitterOFF"
+   \            724F464600  
+
+   \                                 In  segment DATA16_C, align 2, align-sorted
+   \                     `?<Constant "           ">`:
+   \   000000   202020202020 DC8 20H, 20H, 20H, 20H, 20H, 20H, 20H, 20H
+   \            2020        
+   \   000008   202020       DC8 20H, 20H, 20H
+   \   00000B   00           DC8 0
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "  WHITE    ">`:
+   \   000000   202057484954 DC8 "  WHITE    "
+   \            452020202000
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "CALIBRATE ">`:
+   \   000000   43414C494252 DC8 "CALIBRATE "
+   \            4154452000  
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "  VALUE:  ">`:
+   \   000000   202056414C55 DC8 "  VALUE:  "
+   \            453A202000  
+
+   \                                 In  segment DATA16_C, align 2, align-sorted
+   \                     `?<Constant "           ">_1`:
+   \   000000   202020202020 DC8 20H, 20H, 20H, 20H, 20H, 20H, 20H, 20H
+   \            2020        
+   \   000008   202020       DC8 20H, 20H, 20H
+   \   00000B   00           DC8 0
+
+   \                                 In  segment DATA16_C, align 1, align-sorted
+   \                     `?<Constant "  BLACK    ">`:
+   \   000000   2020424C4143 DC8 "  BLACK    "
+   \            4B2020202000
+
+   \                                 In  segment DATA16_C, align 2, align-sorted
+   \                     `?<Constant "V_DL:     ">`:
+   \   000000   565F444C3A20 DC8 "V_DL:     "
+   \            2020202000  
+   \   00000B   00           DC8 0
+
+   \                                 In  segment DATA16_C, align 2, align-sorted
+   \                     `?<Constant "V_DR:     ">`:
+   \   000000   565F44523A20 DC8 "V_DR:     "
+   \            2020202000  
+   \   00000B   00           DC8 0
+
+   \                                 In  segment DATA16_C, align 2, align-sorted
+   \                     `?<Constant "V_TH:     ">`:
+   \   000000   565F54483A20 DC8 "V_TH:     "
+   \            2020202000  
+   \   00000B   00           DC8 0
+    213          
+    214          
+    215          
+    216          //******************************************************************************
+    217          //------------------------------------------------------------------------------
+
+   Maximum stack usage in bytes:
+
+   CSTACK Function
+   ------ --------
+      6   HEXtoBCD
+      4   Init_ADC
+     20   adc_black_calibration
+       20   -> strcpy
+       20   -> update_string
+     20   adc_line2
+       20   -> strcpy
+       20   -> update_string
+     20   adc_line3
+       20   -> strcpy
+       20   -> update_string
+     20   adc_line4
+       20   -> strcpy
+       20   -> update_string
+     20   adc_white_calibration
+       20   -> strcpy
+       20   -> update_string
+
+
+   Segment part sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      12  ?<Constant "           ">
+      12  ?<Constant "           ">_1
+      12  ?<Constant "  BLACK    ">
+      11  ?<Constant "  VALUE:  ">
+      12  ?<Constant "  WHITE    ">
+      11  ?<Constant "CALIBRATE ">
+      12  ?<Constant "V_DL:     ">
+      12  ?<Constant "V_DR:     ">
+      12  ?<Constant "V_TH:     ">
+      11  ?<Initializer for emitter_state_off>
+      11  ?<Initializer for emitter_state_on>
+     138  HEXtoBCD
+     112  Init_ADC
+       2  _A_ADCCTL0_L
+       2  _A_ADCCTL1_L
+       2  _A_ADCCTL2_L
+       2  _A_ADCIE_L
+       2  _A_ADCMCTL0_L
+     178  adc_black_calibration
+       5  adc_char
+     158  adc_line2
+     158  adc_line3
+     160  adc_line4
+     178  adc_white_calibration
+      11  emitter_state_off
+      11  emitter_state_on
+
+ 
+ 1 082 bytes in segment CODE
+    10 bytes in segment DATA16_AN
+   106 bytes in segment DATA16_C
+    22 bytes in segment DATA16_I
+    22 bytes in segment DATA16_ID
+     5 bytes in segment DATA16_Z
+ 
+ 1 082 bytes of CODE  memory
+   128 bytes of CONST memory
+    27 bytes of DATA  memory (+ 10 bytes shared)
+
+Errors: none
+Warnings: none

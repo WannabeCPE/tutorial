@@ -1,0 +1,503 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V7.20.1.997/W32 for MSP430           16/Dec/2020  20:46:51
+# Copyright 1996-2020 IAR Systems AB.
+# PC-locked license - IAR Embedded Workbench for MSP430, 8K KickStart Edition 7.20
+#
+#    __rt_version  =  3
+#    __double_size =  32
+#    __reg_r4      =  free
+#    __reg_r5      =  free
+#    __pic         =  no
+#    __core        =  430X
+#    __data_model  =  small
+#    __code_model  =  large
+#    Source file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_10\drive.c
+#    Command line  =  
+#        -f C:\Users\19196\AppData\Local\Temp\EWE34B.tmp
+#        ("C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\drive.c" -lC "C:\Users\19196\OneDrive\Documents\ECE
+#        306 current\Project_10\Debug\List" -o
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\Debug\Obj" --no_cse --no_unroll --no_inline
+#        --no_code_motion --no_tbaa --debug -D__MSP430FR2355__ -e --double=32
+#        --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.4\430\lib\dlib\dl430xlsfn.h" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.4\430\" --core=430X --data_model=small
+#        -On --multiplier=32 --hw_workaround=CPU40 --code_model=large)
+#    Locale        =  English_USA.1252
+#    List file     =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\Debug\List\drive.lst
+#    Object file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\Debug\Obj\drive.r43
+#
+###############################################################################
+
+C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_10\drive.c
+      1          //------------------------------------------------------------------------------
+      2          //
+      3          //  Description: This file contains the Drive, Reverse, and Turn Functions 
+      4          //
+      5          //
+      6          //  Cody Lane
+      7          //  Aug 2020
+      8          //  Built with IAR Embedded Workbench Version: V7.20.1 
+      9          //------------------------------------------------------------------------------
+     10          
+     11          //------------------------------------------------------------------------------
+     12          #include  "msp430.h"
+
+   \                                 In  segment DATA16_AN, at 0x454
+   \   union <unnamed> _A_TB3CCR1_L
+   \                     _A_TB3CCR1_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x456
+   \   union <unnamed> _A_TB3CCR2_L
+   \                     _A_TB3CCR2_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x458
+   \   union <unnamed> _A_TB3CCR3_L
+   \                     _A_TB3CCR3_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x45a
+   \   union <unnamed> _A_TB3CCR4_L
+   \                     _A_TB3CCR4_L:
+   \   000000                DS8 2
+     13          #include  "functions.h"
+     14          #include <string.h>
+     15          #include  "macros.h"
+     16          
+     17          extern volatile unsigned int ADC_Left_Detect;
+     18          extern volatile unsigned int ADC_Right_Detect;
+     19          extern volatile unsigned int line_follow_ready;
+     20          extern volatile char current_circle_state;
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     21          volatile char previous_circle_state = NONE;
+   \                     previous_circle_state:
+   \   000000                DS8 1
+   \   000001                REQUIRE `?<Initializer for previous_circle_state>`
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     22          volatile int previous_error = RESET_STATE;
+   \                     previous_error:
+   \   000000                DS8 2
+     23          extern unsigned int left_val, right_val;
+     24          
+     25          
+
+   \                                 In  segment CODE, align 2
+     26          void driveForward(void) {
+   \                     driveForward:
+     27          	motorsOff();
+   \   000000   ........     CALLA   #motorsOff
+     28          	RIGHT_FORWARD_SPEED = 15000;
+   \   000004   B240983A5404 MOV.W   #0x3a98, &0x454
+     29          	LEFT_FORWARD_SPEED = 16000;
+   \   00000A   B240803E5604 MOV.W   #0x3e80, &0x456
+     30          }
+   \   000010   1001         RETA
+   \   000012                REQUIRE _A_TB3CCR1_L
+   \   000012                REQUIRE _A_TB3CCR2_L
+     31          
+
+   \                                 In  segment CODE, align 2
+     32          void driveReverse(void) {
+   \                     driveReverse:
+     33          	motorsOff();
+   \   000000   ........     CALLA   #motorsOff
+     34          	RIGHT_REVERSE_SPEED = 20000;
+   \   000004   B240204E5804 MOV.W   #0x4e20, &0x458
+     35          	LEFT_REVERSE_SPEED = 20000;
+   \   00000A   B240204E5A04 MOV.W   #0x4e20, &0x45a
+     36          	
+     37          
+     38          
+     39          }
+   \   000010   1001         RETA
+   \   000012                REQUIRE _A_TB3CCR3_L
+   \   000012                REQUIRE _A_TB3CCR4_L
+     40          
+
+   \                                 In  segment CODE, align 2
+     41          void motorsOff(void) {
+   \                     motorsOff:
+     42          	RIGHT_FORWARD_SPEED = WHEEL_OFF;
+   \   000000   82435404     MOV.W   #0x0, &0x454
+     43          	LEFT_FORWARD_SPEED = WHEEL_OFF;
+   \   000004   82435604     MOV.W   #0x0, &0x456
+     44          	RIGHT_REVERSE_SPEED = WHEEL_OFF;
+   \   000008   82435804     MOV.W   #0x0, &0x458
+     45          	LEFT_REVERSE_SPEED = WHEEL_OFF;
+   \   00000C   82435A04     MOV.W   #0x0, &0x45a
+     46          }
+   \   000010   1001         RETA
+   \   000012                REQUIRE _A_TB3CCR1_L
+   \   000012                REQUIRE _A_TB3CCR2_L
+   \   000012                REQUIRE _A_TB3CCR3_L
+   \   000012                REQUIRE _A_TB3CCR4_L
+     47          
+
+   \                                 In  segment CODE, align 2
+     48          void spinLeft(void) {
+   \                     spinLeft:
+     49          	motorsOff();
+   \   000000   ........     CALLA   #motorsOff
+     50          	RIGHT_FORWARD_SPEED = 20000 ;
+   \   000004   B240204E5404 MOV.W   #0x4e20, &0x454
+     51          	LEFT_REVERSE_SPEED = 21000;
+   \   00000A   B24008525A04 MOV.W   #0x5208, &0x45a
+     52          }
+   \   000010   1001         RETA
+   \   000012                REQUIRE _A_TB3CCR1_L
+   \   000012                REQUIRE _A_TB3CCR4_L
+     53          
+
+   \                                 In  segment CODE, align 2
+     54          void spinRight(void) {
+   \                     spinRight:
+     55          	motorsOff();
+   \   000000   ........     CALLA   #motorsOff
+     56          	RIGHT_REVERSE_SPEED = 20000;
+   \   000004   B240204E5804 MOV.W   #0x4e20, &0x458
+     57          	LEFT_FORWARD_SPEED = 21000;
+   \   00000A   B24008525604 MOV.W   #0x5208, &0x456
+     58          
+     59          }
+   \   000010   1001         RETA
+   \   000012                REQUIRE _A_TB3CCR3_L
+   \   000012                REQUIRE _A_TB3CCR2_L
+     60          
+
+   \                                 In  segment CODE, align 2
+     61          void turnLeft(int pwm_fast, int pwm_slow) {
+   \                     turnLeft:
+     62          	motorsOff();
+   \   000000   ........     CALLA   #motorsOff
+     63          
+     64          	RIGHT_FORWARD_SPEED = pwm_fast;
+   \   000004   824C5404     MOV.W   R12, &0x454
+     65          	LEFT_FORWARD_SPEED = pwm_slow;
+   \   000008   824D5604     MOV.W   R13, &0x456
+     66          	
+     67          	
+     68          }
+   \   00000C   1001         RETA
+   \   00000E                REQUIRE _A_TB3CCR1_L
+   \   00000E                REQUIRE _A_TB3CCR2_L
+
+   \                                 In  segment CODE, align 2
+     69          void turnRight(int pwm_fast, int pwm_slow) {
+   \                     turnRight:
+     70          	motorsOff();
+   \   000000   ........     CALLA   #motorsOff
+     71          
+     72          	RIGHT_FORWARD_SPEED = pwm_slow;
+   \   000004   824D5404     MOV.W   R13, &0x454
+     73          	LEFT_FORWARD_SPEED = pwm_fast;
+   \   000008   824C5604     MOV.W   R12, &0x456
+     74          	
+     75          	
+     76          }
+   \   00000C   1001         RETA
+   \   00000E                REQUIRE _A_TB3CCR1_L
+   \   00000E                REQUIRE _A_TB3CCR2_L
+     77          
+
+   \                                 In  segment CODE, align 2
+     78          void backRight(void) {
+   \                     backRight:
+     79          	motorsOff();
+   \   000000   ........     CALLA   #motorsOff
+     80          	LEFT_REVERSE_SPEED = LEFT_REVERSE_WHEEL_ON;
+   \   000004   B240A8615A04 MOV.W   #0x61a8, &0x45a
+     81          }
+   \   00000A   1001         RETA
+   \   00000C                REQUIRE _A_TB3CCR4_L
+     82          
+     83          
+
+   \                                 In  segment CODE, align 2
+     84          void followLine(void) {
+   \                     followLine:
+     85          	motorsOff();
+   \   000000   ........     CALLA   #motorsOff
+     86          
+     87          	if (line_follow_ready) {
+   \   000004   8293....     CMP.W   #0x0, &line_follow_ready
+   \   000008   3624         JEQ     ??followLine_2
+     88          		line_follow_ready = RESET_STATE;
+   \   00000A   8243....     MOV.W   #0x0, &line_follow_ready
+     89          		if (current_circle_state == WHITE_STATE) {
+   \   00000E   F2907700.... CMP.B   #0x77, &current_circle_state
+   \   000014   2020         JNE     ??followLine_3
+     90          			switch (previous_circle_state) {
+   \   000016   5E42....     MOV.B   &previous_circle_state, R14
+   \   00001A   7E806C00     SUB.B   #0x6c, R14
+   \   00001E   0424         JEQ     ??followLine_4
+   \   000020   7E800600     SUB.B   #0x6, R14
+   \   000024   0B24         JEQ     ??followLine_5
+   \   000026   143C         JMP     ??followLine_0
+     91          			case LEFT_SIDE:
+     92          				turnLeft(12000, 8000);
+   \                     ??followLine_4:
+   \   000028   3D40401F     MOV.W   #0x1f40, R13
+   \   00002C   3C40E02E     MOV.W   #0x2ee0, R12
+   \   000030   ........     CALLA   #turnLeft
+     93          				current_circle_state = LEFT_SIDE;
+   \   000034   F2406C00.... MOV.B   #0x6c, &current_circle_state
+     94          				break;
+   \   00003A   1A3C         JMP     ??followLine_1
+     95          			case RIGHT_SIDE:
+     96          				turnLeft(14000, 6000);
+   \                     ??followLine_5:
+   \   00003C   3D407017     MOV.W   #0x1770, R13
+   \   000040   3C40B036     MOV.W   #0x36b0, R12
+   \   000044   ........     CALLA   #turnLeft
+     97          				current_circle_state = RIGHT_SIDE;
+   \   000048   F2407200.... MOV.B   #0x72, &current_circle_state
+     98          				break;
+   \   00004E   103C         JMP     ??followLine_1
+     99          			default:
+    100          				motorsOff();
+   \                     ??followLine_0:
+   \   000050   ........     CALLA   #motorsOff
+    101          				break;
+   \   000054   0D3C         JMP     ??followLine_1
+    102          			}
+    103          
+    104          		}
+    105          		else if (current_circle_state == BLACK_LINE) {
+   \                     ??followLine_3:
+   \   000056   F2906200.... CMP.B   #0x62, &current_circle_state
+   \   00005C   0720         JNE     ??followLine_6
+    106          			turnLeft(12000, 6000);
+   \   00005E   3D407017     MOV.W   #0x1770, R13
+   \   000062   3C40E02E     MOV.W   #0x2ee0, R12
+   \   000066   ........     CALLA   #turnLeft
+   \   00006A   023C         JMP     ??followLine_1
+    107          		}
+    108          		else {
+    109          
+    110          			WheelControl();
+   \                     ??followLine_6:
+   \   00006C   ........     CALLA   #WheelControl
+    111          		}
+    112          		previous_circle_state = current_circle_state;
+   \                     ??followLine_1:
+   \   000070   D242........ MOV.B   &current_circle_state, &previous_circle_state
+    113          	
+    114          	}
+    115          	
+    116          	line_follow_ready = TRUE;
+   \                     ??followLine_2:
+   \   000076   9243....     MOV.W   #0x1, &line_follow_ready
+    117          
+    118          	
+    119          }
+   \   00007A   1001         RETA
+    120          
+
+   \                                 In  segment CODE, align 2
+    121          void WheelControl(void) {
+   \                     WheelControl:
+   \   000000   3B15         PUSHM.W #0x4, R11
+    122          	int pwm_fast, pwm_slow;
+    123          	int total_error, delta_error, e;
+    124          	e = left_val - right_val;
+   \   000002   1D42....     MOV.W   &left_val, R13
+   \   000006   1D82....     SUB.W   &right_val, R13
+   \   00000A   0B4D         MOV.W   R13, R11
+    125          	delta_error = e - previous_error;
+   \   00000C   0D4B         MOV.W   R11, R13
+   \   00000E   1D82....     SUB.W   &previous_error, R13
+   \   000012   0A4D         MOV.W   R13, R10
+    126          	previous_error = e;
+   \   000014   824B....     MOV.W   R11, &previous_error
+    127          	
+    128          	total_error = (e + delta_error) * 100;
+   \   000018   0D4B         MOV.W   R11, R13
+   \   00001A   0D5A         ADD.W   R10, R13
+   \   00001C   5D06         RLAM.W  #0x2, R13
+   \   00001E   0C4D         MOV.W   R13, R12
+   \   000020   5D0A         RLAM.W  #0x3, R13
+   \   000022   0C5D         ADD.W   R13, R12
+   \   000024   0D5D         RLA.W   R13
+   \   000026   0D5C         ADD.W   R12, R13
+   \   000028   084D         MOV.W   R13, R8
+    129          	if (total_error < 0) {
+   \   00002A   0893         CMP.W   #0x0, R8
+   \   00002C   1F34         JGE     ??WheelControl_5
+    130          		pwm_fast = CRUISE_SPEED_LEFT - total_error;
+   \   00002E   3D407017     MOV.W   #0x1770, R13
+   \   000032   0D88         SUB.W   R8, R13
+   \   000034   0F4D         MOV.W   R13, R15
+    131          		pwm_slow = CRUISE_SPEED_RIGHT + total_error;
+   \   000036   0D48         MOV.W   R8, R13
+   \   000038   3D50E02E     ADD.W   #0x2ee0, R13
+   \   00003C   0E4D         MOV.W   R13, R14
+    132          		if (pwm_fast > 32000) {
+   \   00003E   3F90017D     CMP.W   #0x7d01, R15
+   \   000042   0338         JL      ??WheelControl_6
+    133          			pwm_fast = 32000;
+   \   000044   3F40007D     MOV.W   #0x7d00, R15
+   \   000048   033C         JMP     ??WheelControl_0
+    134          		}
+    135          		else if (pwm_fast < 0) {
+   \                     ??WheelControl_6:
+   \   00004A   0F93         CMP.W   #0x0, R15
+   \   00004C   0134         JGE     ??WheelControl_0
+    136          			pwm_fast = 0;
+   \   00004E   0F43         MOV.W   #0x0, R15
+    137          		}
+    138          		if (pwm_slow > 32000) {
+   \                     ??WheelControl_0:
+   \   000050   3E90017D     CMP.W   #0x7d01, R14
+   \   000054   0338         JL      ??WheelControl_7
+    139          			pwm_slow = 32000;
+   \   000056   3E40007D     MOV.W   #0x7d00, R14
+   \   00005A   033C         JMP     ??WheelControl_1
+    140          		}
+    141          		else if (pwm_slow < 0) {
+   \                     ??WheelControl_7:
+   \   00005C   0E93         CMP.W   #0x0, R14
+   \   00005E   0134         JGE     ??WheelControl_1
+    142          			pwm_slow = 0;
+   \   000060   0E43         MOV.W   #0x0, R14
+    143          		}
+    144          		turnRight(pwm_fast, pwm_slow);
+   \                     ??WheelControl_1:
+   \   000062   0D4E         MOV.W   R14, R13
+   \   000064   0C4F         MOV.W   R15, R12
+   \   000066   ........     CALLA   #turnRight
+   \   00006A   203C         JMP     ??WheelControl_2
+    145          	}
+    146          	else if (total_error >= 0) {
+   \                     ??WheelControl_5:
+   \   00006C   0893         CMP.W   #0x0, R8
+   \   00006E   1E38         JL      ??WheelControl_2
+    147          		pwm_fast = CRUISE_SPEED_RIGHT + total_error;
+   \   000070   0D48         MOV.W   R8, R13
+   \   000072   3D50E02E     ADD.W   #0x2ee0, R13
+   \   000076   0F4D         MOV.W   R13, R15
+    148          		pwm_slow = CRUISE_SPEED_LEFT - total_error;
+   \   000078   3D407017     MOV.W   #0x1770, R13
+   \   00007C   0D88         SUB.W   R8, R13
+   \   00007E   0E4D         MOV.W   R13, R14
+    149          		if (pwm_fast > 32000) {
+   \   000080   3F90017D     CMP.W   #0x7d01, R15
+   \   000084   0338         JL      ??WheelControl_8
+    150          			pwm_fast = 32000;
+   \   000086   3F40007D     MOV.W   #0x7d00, R15
+   \   00008A   033C         JMP     ??WheelControl_3
+    151          		}
+    152          		else if (pwm_fast < 0) {
+   \                     ??WheelControl_8:
+   \   00008C   0F93         CMP.W   #0x0, R15
+   \   00008E   0134         JGE     ??WheelControl_3
+    153          			pwm_fast = 0;
+   \   000090   0F43         MOV.W   #0x0, R15
+    154          		}
+    155          		if (pwm_slow > 32000) {
+   \                     ??WheelControl_3:
+   \   000092   3E90017D     CMP.W   #0x7d01, R14
+   \   000096   0338         JL      ??WheelControl_9
+    156          			pwm_slow = 32000;
+   \   000098   3E40007D     MOV.W   #0x7d00, R14
+   \   00009C   033C         JMP     ??WheelControl_4
+    157          		}
+    158          		else if (pwm_slow < 0) {
+   \                     ??WheelControl_9:
+   \   00009E   0E93         CMP.W   #0x0, R14
+   \   0000A0   0134         JGE     ??WheelControl_4
+    159          			pwm_slow = 0;
+   \   0000A2   0E43         MOV.W   #0x0, R14
+    160          		}
+    161          		turnLeft(pwm_fast, pwm_slow);
+   \                     ??WheelControl_4:
+   \   0000A4   0D4E         MOV.W   R14, R13
+   \   0000A6   0C4F         MOV.W   R15, R12
+   \   0000A8   ........     CALLA   #turnLeft
+    162          	}
+    163          	
+    164          
+    165          }
+   \                     ??WheelControl_2:
+   \   0000AC   3817         POPM.W  #0x4, R11
+   \   0000AE   1001         RETA
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for previous_circle_state>`:
+   \   000000   4E           DC8 78
+
+   Maximum stack usage in bytes:
+
+   CSTACK Function
+   ------ --------
+     12   WheelControl
+       12   -> turnLeft
+       12   -> turnRight
+      4   backRight
+        4   -> motorsOff
+      4   driveForward
+        4   -> motorsOff
+      4   driveReverse
+        4   -> motorsOff
+      4   followLine
+        4   -> WheelControl
+        4   -> motorsOff
+        4   -> turnLeft
+      4   motorsOff
+      4   spinLeft
+        4   -> motorsOff
+      4   spinRight
+        4   -> motorsOff
+      4   turnLeft
+        4   -> motorsOff
+      4   turnRight
+        4   -> motorsOff
+
+
+   Segment part sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       1  ?<Initializer for previous_circle_state>
+     176  WheelControl
+       2  _A_TB3CCR1_L
+       2  _A_TB3CCR2_L
+       2  _A_TB3CCR3_L
+       2  _A_TB3CCR4_L
+      12  backRight
+      18  driveForward
+      18  driveReverse
+     124  followLine
+      18  motorsOff
+       1  previous_circle_state
+       2  previous_error
+      18  spinLeft
+      18  spinRight
+      14  turnLeft
+      14  turnRight
+
+ 
+ 430 bytes in segment CODE
+   8 bytes in segment DATA16_AN
+   1 byte  in segment DATA16_I
+   1 byte  in segment DATA16_ID
+   2 bytes in segment DATA16_Z
+ 
+ 430 bytes of CODE  memory
+   1 byte  of CONST memory
+   3 bytes of DATA  memory (+ 8 bytes shared)
+
+Errors: none
+Warnings: none

@@ -1,0 +1,9 @@
+DAC.pbi: D:\Google-NCSU\ECE306\Current\Homework\HW1\Homework\ 01\DAC.c \
+  D:\Google-NCSU\ECE306\Current\Homework\HW1\Homework\ 01/functions.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\430\inc\msp430.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\430\inc/msp430fr2355.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\430\inc/in430.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\430\inc/intrinsics.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\430\inc/legacy.h \
+  D:\Google-NCSU\ECE306\Current\Homework\HW1\Homework\ 01/macros.h \
+  D:\Google-NCSU\ECE306\Current\Homework\HW1\Homework\ 01/ports.h

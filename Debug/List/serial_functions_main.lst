@@ -1,0 +1,1246 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V7.20.1.997/W32 for MSP430           15/Dec/2020  18:29:57
+# Copyright 1996-2020 IAR Systems AB.
+# PC-locked license - IAR Embedded Workbench for MSP430, 8K KickStart Edition 7.20
+#
+#    __rt_version  =  3
+#    __double_size =  32
+#    __reg_r4      =  free
+#    __reg_r5      =  free
+#    __pic         =  no
+#    __core        =  430X
+#    __data_model  =  small
+#    __code_model  =  large
+#    Source file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\serial_functions_main.c
+#    Command line  =  
+#        -f C:\Users\19196\AppData\Local\Temp\EW35C6.tmp
+#        ("C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\serial_functions_main.c" -lC
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\Debug\List" -o
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\Debug\Obj" --no_cse --no_unroll --no_inline
+#        --no_code_motion --no_tbaa --debug -D__MSP430FR2355__ -e --double=32
+#        --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.4\430\lib\dlib\dl430xlsfn.h" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.4\430\" --core=430X --data_model=small
+#        -On --multiplier=32 --hw_workaround=CPU40 --code_model=large)
+#    Locale        =  English_USA.1252
+#    List file     =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\Debug\List\serial_functions_main.lst
+#    Object file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_10\Debug\Obj\serial_functions_main.r43
+#
+###############################################################################
+
+C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_10\serial_functions_main.c
+      1          //------------------------------------------------------------------------------
+      2          //
+      3          //  Description: This file contains serial communication functions for the Main Routine - "While" Operating System
+      4          //
+      5          //
+      6          //  Cody Lane
+      7          //  Nov 2020
+      8          //  Built with IAR Embedded Workbench Version: V7.20.1 
+      9          //------------------------------------------------------------------------------
+     10          
+     11          //------------------------------------------------------------------------------
+     12          #include  "msp430.h"
+
+   \                                 In  segment DATA16_AN, at 0x3c4
+   \   union <unnamed> _A_TB1CCTL1_L
+   \                     _A_TB1CCTL1_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x3c6
+   \   union <unnamed> _A_TB1CCTL2_L
+   \                     _A_TB1CCTL2_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x50e
+   \   union <unnamed> _A_UCA0TXBUF_L
+   \                     _A_UCA0TXBUF_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x51a
+   \   union <unnamed> _A_UCA0IE_L
+   \                     _A_UCA0IE_L:
+   \   000000                DS8 2
+     13          #include  "functions.h"
+     14          #include <string.h>
+     15          #include  "macros.h"
+     16          
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     17          volatile unsigned int change_baud = RESET_STATE;
+   \                     change_baud:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     18          volatile char speed = BR_SPEED_0;
+   \                     speed:
+   \   000000                DS8 1
+   \   000001                REQUIRE `?<Initializer for speed>`
+     19          
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     20          volatile char usb_process_buff[LARGE_RING_SIZE];
+   \                     usb_process_buff:
+   \   000000                DS8 32
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     21          volatile char iot_process_buff[LARGE_RING_SIZE];
+   \                     iot_process_buff:
+   \   000000                DS8 32
+     22          
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     23          volatile unsigned int usb_pb_index = RESET_STATE;
+   \                     usb_pb_index:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     24          volatile unsigned int iot_pb_index = RESET_STATE;
+   \                     iot_pb_index:
+   \   000000                DS8 2
+     25          
+     26          extern volatile unsigned int usb_rx_ring_rd;
+     27          extern volatile unsigned int usb_rx_ring_wr;
+     28          extern volatile unsigned int iot_rx_ring_rd;
+     29          extern volatile unsigned int iot_rx_ring_wr;
+     30          
+     31          extern volatile unsigned int iot_2_pc_transmit;
+     32          extern volatile unsigned int pc_2_iot_transmit;
+     33          
+     34          extern volatile unsigned int iot_fram_command_received;
+     35          extern volatile unsigned int pc_fram_command_received;
+     36          
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     37          unsigned int iot_pb_updated = RESET_STATE;
+   \                     iot_pb_updated:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     38          unsigned int usb_pb_updated = RESET_STATE;
+   \                     usb_pb_updated:
+   \   000000                DS8 2
+     39          
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     40          char iot_fram_command_message[LARGE_RING_SIZE] = { "IOT FRAM"};
+   \                     iot_fram_command_message:
+   \   000000                DS8 32
+   \   000020                REQUIRE `?<Initializer for iot_fram_command_message>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     41          char pc_fram_command_message[LARGE_RING_SIZE] = { "PC FRAM" };
+   \                     pc_fram_command_message:
+   \   000000                DS8 32
+   \   000020                REQUIRE `?<Initializer for pc_fram_command_message>`
+     42          
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     43          char forward[11] = " FORWARD  ";
+   \                     forward:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for forward>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     44          char turn_left[11] = "TURN LEFT ";
+   \                     turn_left:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for turn_left>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     45          char turn_right[11] = "TURN RIGHT";
+   \                     turn_right:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for turn_right>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     46          char reverse[11] = " REVERSE  ";
+   \                     reverse:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for reverse>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     47          char spin_left[11] = "SPIN LEFT ";
+   \                     spin_left:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for spin_left>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     48          char spin_right[11] = "SPIN RIGHT";
+   \                     spin_right:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for spin_right>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     49          char stop[11] = "   STOP   ";
+   \                     stop:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for stop>`
+     50          
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     51          unsigned int carrot_rd;
+   \                     carrot_rd:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     52          volatile unsigned int fram_2_iot_ready = RESET_STATE;
+   \                     fram_2_iot_ready:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     53          char at[3] = { "T\r" };
+   \                     at:
+   \   000000                DS8 3
+   \   000003                REQUIRE `?<Initializer for at>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     54          char at_nstat[11] = { "T+NSTAT=?\r" };
+   \                     at_nstat:
+   \   000000                DS8 11
+   \   00000B                REQUIRE `?<Initializer for at_nstat>`
+
+   \                                 In  segment DATA16_I, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_copy
+     55          char at_nstcp[18] = { "T+NSTCP=65001,1\r" };
+   \                     at_nstcp:
+   \   000000                DS8 18
+   \   000012                REQUIRE `?<Initializer for at_nstcp>`
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     56          volatile unsigned int get_ok = RESET_STATE;
+   \                     get_ok:
+   \   000000                DS8 2
+     57          extern volatile unsigned int IP_received;
+     58          extern volatile unsigned int ok_received;
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     59          volatile unsigned int send_at = RESET_STATE;
+   \                     send_at:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     60          volatile unsigned int get_SSID = RESET_STATE;
+   \                     get_SSID:
+   \   000000                DS8 2
+     61          extern volatile char SSID_received;
+     62          
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     63          volatile char send_nstcp = RESET_STATE;
+   \                     send_nstcp:
+   \   000000                DS8 1
+     64          
+     65          extern volatile char IOT_COMMAND[5][10];
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     66          unsigned int iot_command_rd = RESET_STATE;
+   \                     iot_command_rd:
+   \   000000                DS8 2
+     67          extern volatile char iot_command_received;
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     68          volatile char iot_command_active = RESET_STATE;
+   \                     iot_command_active:
+   \   000000                DS8 1
+     69          extern volatile unsigned int iot_command_direct;
+     70          extern char iot_command_display[11];
+     71          extern volatile char display_state;
+     72          
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     73          unsigned int iot_first_command = RESET_STATE;
+   \                     iot_first_command:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     74          volatile char course_timer_increment = RESET_STATE;
+   \                     course_timer_increment:
+   \   000000                DS8 1
+     75          
+     76          extern volatile char USB_Char_Rx[SMALL_RING_SIZE];
+     77          extern volatile char IOT_Char_Rx[SMALL_RING_SIZE];
+     78          
+     79          extern volatile char CARROT_COMMAND[SMALL_RING_SIZE];
+     80          extern volatile char FRAM_2_IOT[LARGE_RING_SIZE];
+     81          
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     82          volatile unsigned int drive_distance = RESET_STATE;
+   \                     drive_distance:
+   \   000000                DS8 2
+     83          extern volatile char drive_state;
+     84          
+
+   \                                 In  segment DATA16_Z, align 2, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     85          unsigned int marker_count = RESET_STATE;
+   \                     marker_count:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_Z, align 1, align-sorted
+   \   000000                REQUIRE ?cstart_init_zero
+     86          volatile char marker_found = RESET_STATE;
+   \                     marker_found:
+   \   000000                DS8 1
+     87          
+     88          
+
+   \                                 In  segment CODE, align 2
+     89          void baud(void) {
+   \                     baud:
+     90          	if (change_baud) {
+   \   000000   8293....     CMP.W   #0x0, &change_baud
+   \   000004   0624         JEQ     ??baud_0
+     91          		change_baud = RESET_STATE;
+   \   000006   8243....     MOV.W   #0x0, &change_baud
+     92          		Init_Serial_UCA0(speed);
+   \   00000A   5C42....     MOV.B   &speed, R12
+   \   00000E   ........     CALLA   #Init_Serial_UCA0
+     93          	}
+     94          }
+   \                     ??baud_0:
+   \   000012   1001         RETA
+     95          
+     96          
+     97          
+
+   \                                 In  segment CODE, align 2
+     98          void transmit_2_iot(void) {
+   \                     transmit_2_iot:
+     99          	if (send_at) {
+   \   000000   8293....     CMP.W   #0x0, &send_at
+   \   000004   0924         JEQ     ??transmit_2_iot_0
+    100          		send_at = FALSE;
+   \   000006   8243....     MOV.W   #0x0, &send_at
+    101          		pc_fram_command_received = TRUE;
+   \   00000A   9243....     MOV.W   #0x1, &pc_fram_command_received
+    102          		CARROT_COMMAND[carrot_rd] = 'A';
+   \   00000E   1F42....     MOV.W   &carrot_rd, R15
+   \   000012   FF404100.... MOV.B   #0x41, CARROT_COMMAND(R15)
+    103          	}
+    104          
+    105          	if (ok_received) {
+   \                     ??transmit_2_iot_0:
+   \   000018   8293....     CMP.W   #0x0, &ok_received
+   \   00001C   0924         JEQ     ??transmit_2_iot_1
+    106          		pc_fram_command_received = TRUE;
+   \   00001E   9243....     MOV.W   #0x1, &pc_fram_command_received
+    107          		ok_received = FALSE;
+   \   000022   8243....     MOV.W   #0x0, &ok_received
+    108          		CARROT_COMMAND[carrot_rd] = 'N';
+   \   000026   1F42....     MOV.W   &carrot_rd, R15
+   \   00002A   FF404E00.... MOV.B   #0x4e, CARROT_COMMAND(R15)
+    109          	}
+    110          
+    111          	if (send_nstcp) {
+   \                     ??transmit_2_iot_1:
+   \   000030   C293....     CMP.B   #0x0, &send_nstcp
+   \   000034   0924         JEQ     ??transmit_2_iot_2
+    112          		pc_fram_command_received = TRUE;
+   \   000036   9243....     MOV.W   #0x1, &pc_fram_command_received
+    113          		send_nstcp = FALSE;
+   \   00003A   C243....     MOV.B   #0x0, &send_nstcp
+    114          		CARROT_COMMAND[carrot_rd] = 'P';
+   \   00003E   1F42....     MOV.W   &carrot_rd, R15
+   \   000042   FF405000.... MOV.B   #0x50, CARROT_COMMAND(R15)
+    115          	}
+    116          
+    117          	if (SSID_received) {
+   \                     ??transmit_2_iot_2:
+   \   000048   C293....     CMP.B   #0x0, &SSID_received
+   \   00004C   0324         JEQ     ??transmit_2_iot_3
+    118          		TB1CCTL2 |= CCIE;
+   \   00004E   B2D01000C603 BIS.W   #0x10, &0x3c6
+    119          	}
+    120          
+    121          
+    122          }
+   \                     ??transmit_2_iot_3:
+   \   000054   1001         RETA
+   \   000056                REQUIRE _A_TB1CCTL2_L
+    123          
+
+   \                                 In  segment CODE, align 2
+    124          void carrot_command_buffer(void) {
+   \                     carrot_command_buffer:
+    125          	if (pc_fram_command_received) {
+   \   000000   8293....     CMP.W   #0x0, &pc_fram_command_received
+   \   000004   A124         JEQ     ??carrot_command_buffer_8
+    126          		switch (CARROT_COMMAND[carrot_rd]) {
+   \   000006   1F42....     MOV.W   &carrot_rd, R15
+   \   00000A   5E4F....     MOV.B   CARROT_COMMAND(R15), R14
+   \   00000E   7E804100     SUB.B   #0x41, R14
+   \   000012   0B24         JEQ     ??carrot_command_buffer_9
+   \   000014   7E800500     SUB.B   #0x5, R14
+   \   000018   6C24         JEQ     ??carrot_command_buffer_10
+   \   00001A   7E82         SUB.B   #0x8, R14
+   \   00001C   2724         JEQ     ??carrot_command_buffer_11
+   \   00001E   6E83         SUB.B   #0x2, R14
+   \   000020   4624         JEQ     ??carrot_command_buffer_12
+   \   000022   7E800300     SUB.B   #0x3, R14
+   \   000026   7B24         JEQ     ??carrot_command_buffer_13
+   \   000028   1001         RETA
+    127          		case 'A':
+    128          			for (int i = 0; i < sizeof(at); i++) {
+   \                     ??carrot_command_buffer_9:
+   \   00002A   0F43         MOV.W   #0x0, R15
+   \                     ??carrot_command_buffer_0:
+   \   00002C   3F900300     CMP.W   #0x3, R15
+   \   000030   052C         JC      ??carrot_command_buffer_14
+    129          				FRAM_2_IOT[i] = at[i];
+   \   000032   DF4F........ MOV.B   at(R15), FRAM_2_IOT(R15)
+    130          			}
+   \   000038   1F53         ADD.W   #0x1, R15
+   \   00003A   F83F         JMP     ??carrot_command_buffer_0
+    131          			pc_fram_command_received = FALSE;
+   \                     ??carrot_command_buffer_14:
+   \   00003C   8243....     MOV.W   #0x0, &pc_fram_command_received
+    132          			fram_2_iot_ready = TRUE;
+   \   000040   9243....     MOV.W   #0x1, &fram_2_iot_ready
+    133          			get_ok = TRUE;
+   \   000044   9243....     MOV.W   #0x1, &get_ok
+    134          			UCA0TXBUF = 'A';
+   \   000048   B24041000E05 MOV.W   #0x41, &0x50e
+    135          			UCA0IE |= UCTXIE;
+   \   00004E   A2D31A05     BIS.W   #0x2, &0x51a
+    136          
+    137          			CARROT_COMMAND[carrot_rd++] = NULL;
+   \   000052   1F42....     MOV.W   &carrot_rd, R15
+   \   000056   CF43....     MOV.B   #0x0, CARROT_COMMAND(R15)
+   \   00005A   9253....     ADD.W   #0x1, &carrot_rd
+    138          			if (carrot_rd >= sizeof(CARROT_COMMAND)) {
+   \   00005E   B2901000.... CMP.W   #0x10, &carrot_rd
+   \   000064   7128         JNC     ??carrot_command_buffer_8
+    139          				carrot_rd = BEGINNING;
+   \   000066   8243....     MOV.W   #0x0, &carrot_rd
+    140          			}
+    141          			break;
+   \   00006A   1001         RETA
+    142          		case 'N':
+    143          			for (int i = 0; i < sizeof(at_nstat); i++) {
+   \                     ??carrot_command_buffer_11:
+   \   00006C   0F43         MOV.W   #0x0, R15
+   \                     ??carrot_command_buffer_1:
+   \   00006E   3F900B00     CMP.W   #0xb, R15
+   \   000072   052C         JC      ??carrot_command_buffer_15
+    144          				FRAM_2_IOT[i] = at_nstat[i];
+   \   000074   DF4F........ MOV.B   at_nstat(R15), FRAM_2_IOT(R15)
+    145          			}
+   \   00007A   1F53         ADD.W   #0x1, R15
+   \   00007C   F83F         JMP     ??carrot_command_buffer_1
+    146          			pc_fram_command_received = FALSE;
+   \                     ??carrot_command_buffer_15:
+   \   00007E   8243....     MOV.W   #0x0, &pc_fram_command_received
+    147          			fram_2_iot_ready = TRUE;
+   \   000082   9243....     MOV.W   #0x1, &fram_2_iot_ready
+    148          			get_SSID = TRUE;
+   \   000086   9243....     MOV.W   #0x1, &get_SSID
+    149          			UCA0TXBUF = 'A';
+   \   00008A   B24041000E05 MOV.W   #0x41, &0x50e
+    150          			UCA0IE |= UCTXIE;
+   \   000090   A2D31A05     BIS.W   #0x2, &0x51a
+    151          
+    152          			CARROT_COMMAND[carrot_rd++] = NULL;
+   \   000094   1F42....     MOV.W   &carrot_rd, R15
+   \   000098   CF43....     MOV.B   #0x0, CARROT_COMMAND(R15)
+   \   00009C   9253....     ADD.W   #0x1, &carrot_rd
+    153          			if (carrot_rd >= sizeof(CARROT_COMMAND)) {
+   \   0000A0   B2901000.... CMP.W   #0x10, &carrot_rd
+   \   0000A6   5028         JNC     ??carrot_command_buffer_8
+    154          				carrot_rd = BEGINNING;
+   \   0000A8   8243....     MOV.W   #0x0, &carrot_rd
+    155          			}
+    156          			break;
+   \   0000AC   1001         RETA
+    157          
+    158          		case 'P':
+    159          			for (int i = 0; i < sizeof(at_nstcp); i++) {
+   \                     ??carrot_command_buffer_12:
+   \   0000AE   0F43         MOV.W   #0x0, R15
+   \                     ??carrot_command_buffer_2:
+   \   0000B0   3F901200     CMP.W   #0x12, R15
+   \   0000B4   052C         JC      ??carrot_command_buffer_16
+    160          				FRAM_2_IOT[i] = at_nstcp[i];
+   \   0000B6   DF4F........ MOV.B   at_nstcp(R15), FRAM_2_IOT(R15)
+    161          			}
+   \   0000BC   1F53         ADD.W   #0x1, R15
+   \   0000BE   F83F         JMP     ??carrot_command_buffer_2
+    162          			pc_fram_command_received = FALSE;
+   \                     ??carrot_command_buffer_16:
+   \   0000C0   8243....     MOV.W   #0x0, &pc_fram_command_received
+    163          			fram_2_iot_ready = TRUE;
+   \   0000C4   9243....     MOV.W   #0x1, &fram_2_iot_ready
+    164          			display_state = WAITING_FOR_INPUT;
+   \   0000C8   F2407700.... MOV.B   #0x77, &display_state
+    165          			UCA0TXBUF = 'A';
+   \   0000CE   B24041000E05 MOV.W   #0x41, &0x50e
+    166          			UCA0IE |= UCTXIE;
+   \   0000D4   A2D31A05     BIS.W   #0x2, &0x51a
+    167          
+    168          			CARROT_COMMAND[carrot_rd++] = NULL;
+   \   0000D8   1F42....     MOV.W   &carrot_rd, R15
+   \   0000DC   CF43....     MOV.B   #0x0, CARROT_COMMAND(R15)
+   \   0000E0   9253....     ADD.W   #0x1, &carrot_rd
+    169          			if (carrot_rd >= sizeof(CARROT_COMMAND)) {
+   \   0000E4   B2901000.... CMP.W   #0x10, &carrot_rd
+   \   0000EA   2E28         JNC     ??carrot_command_buffer_8
+    170          				carrot_rd = BEGINNING;
+   \   0000EC   8243....     MOV.W   #0x0, &carrot_rd
+    171          			}
+    172          			break;
+   \   0000F0   1001         RETA
+    173          		case 'F':
+    174          			change_baud = TRUE;
+   \                     ??carrot_command_buffer_10:
+   \   0000F2   9243....     MOV.W   #0x1, &change_baud
+    175          			speed = BR_SPEED_0;
+   \   0000F6   F2403000.... MOV.B   #0x30, &speed
+    176          			baud();
+   \   0000FC   ........     CALLA   #baud
+    177          			pc_fram_command_received = FALSE;
+   \   000100   8243....     MOV.W   #0x0, &pc_fram_command_received
+    178          			CARROT_COMMAND[carrot_rd++] = NULL;
+   \   000104   1F42....     MOV.W   &carrot_rd, R15
+   \   000108   CF43....     MOV.B   #0x0, CARROT_COMMAND(R15)
+   \   00010C   9253....     ADD.W   #0x1, &carrot_rd
+    179          			if (carrot_rd >= sizeof(CARROT_COMMAND)) {
+   \   000110   B2901000.... CMP.W   #0x10, &carrot_rd
+   \   000116   1828         JNC     ??carrot_command_buffer_8
+    180          				carrot_rd = BEGINNING;
+   \   000118   8243....     MOV.W   #0x0, &carrot_rd
+    181          			}
+    182          			break;
+   \   00011C   1001         RETA
+    183          			
+    184          		case 'S':
+    185          			change_baud = TRUE;
+   \                     ??carrot_command_buffer_13:
+   \   00011E   9243....     MOV.W   #0x1, &change_baud
+    186          			speed = BR_SPEED_1;
+   \   000122   F2403100.... MOV.B   #0x31, &speed
+    187          			baud();
+   \   000128   ........     CALLA   #baud
+    188          			pc_fram_command_received = FALSE;
+   \   00012C   8243....     MOV.W   #0x0, &pc_fram_command_received
+    189          			CARROT_COMMAND[carrot_rd++] = NULL;
+   \   000130   1F42....     MOV.W   &carrot_rd, R15
+   \   000134   CF43....     MOV.B   #0x0, CARROT_COMMAND(R15)
+   \   000138   9253....     ADD.W   #0x1, &carrot_rd
+    190          			if (carrot_rd >= sizeof(CARROT_COMMAND)) {
+   \   00013C   B2901000.... CMP.W   #0x10, &carrot_rd
+   \   000142   0228         JNC     ??carrot_command_buffer_8
+    191          				carrot_rd = BEGINNING;
+   \   000144   8243....     MOV.W   #0x0, &carrot_rd
+    192          			}
+    193          			break;
+    194          		default: break;
+    195          		}
+    196          	}
+    197          }
+   \                     ??carrot_command_buffer_8:
+   \   000148   1001         RETA
+   \   00014A                REQUIRE _A_UCA0TXBUF_L
+   \   00014A                REQUIRE _A_UCA0IE_L
+    198          
+
+   \                                 In  segment CODE, align 2
+    199          void iot_command_buffer(void) {
+   \                     iot_command_buffer:
+    200          	if (iot_command_received) {
+   \   000000   C293....     CMP.B   #0x0, &iot_command_received
+   \   000004   D124         JEQ     ??iot_command_buffer_0
+    201          		if (++iot_first_command == 1) {
+   \   000006   9253....     ADD.W   #0x1, &iot_first_command
+   \   00000A   9293....     CMP.W   #0x1, &iot_first_command
+   \   00000E   0520         JNE     ??iot_command_buffer_1
+    202          			course_timer_increment = TRUE;
+   \   000010   D243....     MOV.B   #0x1, &course_timer_increment
+    203          			TB1CCTL2 |= CCIE;
+   \   000014   B2D01000C603 BIS.W   #0x10, &0x3c6
+    204          		}
+    205          		if (IOT_COMMAND[iot_command_direct][iot_command_rd] != 'M') {
+   \                     ??iot_command_buffer_1:
+   \   00001A   1F42....     MOV.W   &iot_command_direct, R15
+   \   00001E   0F5F         RLA.W   R15
+   \   000020   0E4F         MOV.W   R15, R14
+   \   000022   5F06         RLAM.W  #0x2, R15
+   \   000024   0F5E         ADD.W   R14, R15
+   \   000026   1F52....     ADD.W   &iot_command_rd, R15
+   \   00002A   FF904D00.... CMP.B   #0x4d, IOT_COMMAND(R15)
+   \   000030   0224         JEQ     ??iot_command_buffer_2
+    206          			marker_found = RESET_STATE;
+   \   000032   C243....     MOV.B   #0x0, &marker_found
+    207          		}
+    208          		switch (IOT_COMMAND[iot_command_direct][iot_command_rd]) {
+   \                     ??iot_command_buffer_2:
+   \   000036   1F42....     MOV.W   &iot_command_direct, R15
+   \   00003A   0F5F         RLA.W   R15
+   \   00003C   0E4F         MOV.W   R15, R14
+   \   00003E   5F06         RLAM.W  #0x2, R15
+   \   000040   0F5E         ADD.W   R14, R15
+   \   000042   1F52....     ADD.W   &iot_command_rd, R15
+   \   000046   5E4F....     MOV.B   IOT_COMMAND(R15), R14
+   \   00004A   7E804200     SUB.B   #0x42, R14
+   \   00004E   4924         JEQ     ??iot_command_buffer_3
+   \   000050   6E82         SUB.B   #0x4, R14
+   \   000052   1124         JEQ     ??iot_command_buffer_4
+   \   000054   7E800600     SUB.B   #0x6, R14
+   \   000058   2024         JEQ     ??iot_command_buffer_5
+   \   00005A   5E83         SUB.B   #0x1, R14
+   \   00005C   8A24         JEQ     ??iot_command_buffer_6
+   \   00005E   7E800500     SUB.B   #0x5, R14
+   \   000062   2D24         JEQ     ??iot_command_buffer_7
+   \   000064   5E83         SUB.B   #0x1, R14
+   \   000066   7324         JEQ     ??iot_command_buffer_8
+   \   000068   7E801900     SUB.B   #0x19, R14
+   \   00006C   4C24         JEQ     ??iot_command_buffer_9
+   \   00006E   7E800600     SUB.B   #0x6, R14
+   \   000072   5B24         JEQ     ??iot_command_buffer_10
+   \   000074   1001         RETA
+    209          		case 'F':
+    210          			display_command();
+   \                     ??iot_command_buffer_4:
+   \   000076   ........     CALLA   #display_command
+    211          			get_drive_data();
+   \   00007A   ........     CALLA   #get_drive_data
+    212          
+    213          			drive_state = 'F';
+   \   00007E   F2404600.... MOV.B   #0x46, &drive_state
+    214          			display_state = IOT_COMMAND_DISPLAY;
+   \   000084   F2404300.... MOV.B   #0x43, &display_state
+    215          			iot_command_active = TRUE;
+   \   00008A   D243....     MOV.B   #0x1, &iot_command_active
+    216          			iot_command_received = FALSE;
+   \   00008E   C243....     MOV.B   #0x0, &iot_command_received
+    217          			TB1CCTL1 |= CCIE;
+   \   000092   B2D01000C403 BIS.W   #0x10, &0x3c4
+    218          			break;
+   \   000098   1001         RETA
+    219          		case 'L':
+    220          			display_command();
+   \                     ??iot_command_buffer_5:
+   \   00009A   ........     CALLA   #display_command
+    221          			get_drive_data();
+   \   00009E   ........     CALLA   #get_drive_data
+    222          
+    223          			drive_state = 'L';
+   \   0000A2   F2404C00.... MOV.B   #0x4c, &drive_state
+    224          			display_state = IOT_COMMAND_DISPLAY;
+   \   0000A8   F2404300.... MOV.B   #0x43, &display_state
+    225          			iot_command_active = TRUE;
+   \   0000AE   D243....     MOV.B   #0x1, &iot_command_active
+    226          			iot_command_received = FALSE;
+   \   0000B2   C243....     MOV.B   #0x0, &iot_command_received
+    227          			TB1CCTL1 |= CCIE;
+   \   0000B6   B2D01000C403 BIS.W   #0x10, &0x3c4
+    228          			break;
+   \   0000BC   1001         RETA
+    229          
+    230          		case 'R':
+    231          			display_command();
+   \                     ??iot_command_buffer_7:
+   \   0000BE   ........     CALLA   #display_command
+    232          			get_drive_data();
+   \   0000C2   ........     CALLA   #get_drive_data
+    233          
+    234          			drive_state = 'R';
+   \   0000C6   F2405200.... MOV.B   #0x52, &drive_state
+    235          			display_state = IOT_COMMAND_DISPLAY;
+   \   0000CC   F2404300.... MOV.B   #0x43, &display_state
+    236          			iot_command_received = FALSE;
+   \   0000D2   C243....     MOV.B   #0x0, &iot_command_received
+    237          			iot_command_active = TRUE;
+   \   0000D6   D243....     MOV.B   #0x1, &iot_command_active
+    238          			TB1CCTL1 |= CCIE;
+   \   0000DA   B2D01000C403 BIS.W   #0x10, &0x3c4
+    239          			break;
+   \   0000E0   1001         RETA
+    240          
+    241          		case 'B':
+    242          			display_command();
+   \                     ??iot_command_buffer_3:
+   \   0000E2   ........     CALLA   #display_command
+    243          			get_drive_data();
+   \   0000E6   ........     CALLA   #get_drive_data
+    244          
+    245          			drive_state = 'B';
+   \   0000EA   F2404200.... MOV.B   #0x42, &drive_state
+    246          			display_state = IOT_COMMAND_DISPLAY;
+   \   0000F0   F2404300.... MOV.B   #0x43, &display_state
+    247          			iot_command_received = FALSE;
+   \   0000F6   C243....     MOV.B   #0x0, &iot_command_received
+    248          			iot_command_active = TRUE;
+   \   0000FA   D243....     MOV.B   #0x1, &iot_command_active
+    249          			TB1CCTL1 |= CCIE;
+   \   0000FE   B2D01000C403 BIS.W   #0x10, &0x3c4
+    250          			break;
+   \   000104   1001         RETA
+    251          
+    252          		case 'l':
+    253          			display_command();
+   \                     ??iot_command_buffer_9:
+   \   000106   ........     CALLA   #display_command
+    254          			get_drive_data();
+   \   00010A   ........     CALLA   #get_drive_data
+    255          
+    256          			drive_state = 'l';
+   \   00010E   F2406C00.... MOV.B   #0x6c, &drive_state
+    257          			display_state = IOT_COMMAND_DISPLAY;
+   \   000114   F2404300.... MOV.B   #0x43, &display_state
+    258          			iot_command_received = FALSE;
+   \   00011A   C243....     MOV.B   #0x0, &iot_command_received
+    259          			iot_command_active = TRUE;
+   \   00011E   D243....     MOV.B   #0x1, &iot_command_active
+    260          			TB1CCTL1 |= CCIE;
+   \   000122   B2D01000C403 BIS.W   #0x10, &0x3c4
+    261          			break;
+   \   000128   1001         RETA
+    262          
+    263          		case 'r':
+    264          			display_command();
+   \                     ??iot_command_buffer_10:
+   \   00012A   ........     CALLA   #display_command
+    265          			get_drive_data();
+   \   00012E   ........     CALLA   #get_drive_data
+    266          
+    267          			drive_state = 'r';
+   \   000132   F2407200.... MOV.B   #0x72, &drive_state
+    268          			display_state = IOT_COMMAND_DISPLAY;
+   \   000138   F2404300.... MOV.B   #0x43, &display_state
+    269          			iot_command_received = FALSE;
+   \   00013E   C243....     MOV.B   #0x0, &iot_command_received
+    270          			iot_command_active = TRUE;
+   \   000142   D243....     MOV.B   #0x1, &iot_command_active
+    271          			TB1CCTL1 |= CCIE;
+   \   000146   B2D01000C403 BIS.W   #0x10, &0x3c4
+    272          			break;
+   \   00014C   1001         RETA
+    273          
+    274          		case 'S':
+    275          			display_command();
+   \                     ??iot_command_buffer_8:
+   \   00014E   ........     CALLA   #display_command
+    276          			get_drive_data();
+   \   000152   ........     CALLA   #get_drive_data
+    277          
+    278          			drive_state = 'S';
+   \   000156   F2405300.... MOV.B   #0x53, &drive_state
+    279          			display_state = IOT_COMMAND_DISPLAY;
+   \   00015C   F2404300.... MOV.B   #0x43, &display_state
+    280          			iot_command_received = FALSE;
+   \   000162   C243....     MOV.B   #0x0, &iot_command_received
+    281          			iot_command_active = TRUE;
+   \   000166   D243....     MOV.B   #0x1, &iot_command_active
+    282          			TB1CCTL1 |= CCIE;
+   \   00016A   B2D01000C403 BIS.W   #0x10, &0x3c4
+    283          			break;
+   \   000170   1001         RETA
+    284          
+    285          		case 'M':
+    286          			get_drive_data();
+   \                     ??iot_command_buffer_6:
+   \   000172   ........     CALLA   #get_drive_data
+    287          
+    288          			marker_found = TRUE;
+   \   000176   D243....     MOV.B   #0x1, &marker_found
+    289          			marker_count++;
+   \   00017A   9253....     ADD.W   #0x1, &marker_count
+    290          			if (marker_count == 8) {
+   \   00017E   B292....     CMP.W   #0x8, &marker_count
+   \   000182   0520         JNE     ??iot_command_buffer_11
+    291          				course_timer_increment = FALSE;
+   \   000184   C243....     MOV.B   #0x0, &course_timer_increment
+    292          				TB1CCTL2 &= ~CCIE;
+   \   000188   B2C01000C603 BIC.W   #0x10, &0x3c6
+    293          			}
+    294          
+    295          			drive_state = 'M';
+   \                     ??iot_command_buffer_11:
+   \   00018E   F2404D00.... MOV.B   #0x4d, &drive_state
+    296          			display_state = IOT_COMMAND_DISPLAY;
+   \   000194   F2404300.... MOV.B   #0x43, &display_state
+    297          			iot_command_received = FALSE;
+   \   00019A   C243....     MOV.B   #0x0, &iot_command_received
+    298          			iot_command_active = TRUE;
+   \   00019E   D243....     MOV.B   #0x1, &iot_command_active
+    299          			TB1CCTL1 |= CCIE;
+   \   0001A2   B2D01000C403 BIS.W   #0x10, &0x3c4
+    300          			break;
+    301          
+    302          			
+    303          			
+    304          		default:break;
+    305          		
+    306          		}
+    307          	}
+    308          }
+   \                     ??iot_command_buffer_0:
+   \   0001A8   1001         RETA
+   \   0001AA                REQUIRE _A_TB1CCTL2_L
+   \   0001AA                REQUIRE _A_TB1CCTL1_L
+    309          
+    310          
+    311          
+    312          
+
+   \                                 In  segment CODE, align 2
+    313          void display_command(void) {
+   \                     display_command:
+    314          	switch (IOT_COMMAND[iot_command_direct][iot_command_rd]) {
+   \   000000   1F42....     MOV.W   &iot_command_direct, R15
+   \   000004   0F5F         RLA.W   R15
+   \   000006   0E4F         MOV.W   R15, R14
+   \   000008   5F06         RLAM.W  #0x2, R15
+   \   00000A   0F5E         ADD.W   R14, R15
+   \   00000C   1F52....     ADD.W   &iot_command_rd, R15
+   \   000010   5E4F....     MOV.B   IOT_COMMAND(R15), R14
+   \   000014   7E804200     SUB.B   #0x42, R14
+   \   000018   2C24         JEQ     ??display_command_15
+   \   00001A   6E82         SUB.B   #0x4, R14
+   \   00001C   0F24         JEQ     ??display_command_16
+   \   00001E   7E800600     SUB.B   #0x6, R14
+   \   000022   1524         JEQ     ??display_command_17
+   \   000024   7E800600     SUB.B   #0x6, R14
+   \   000028   1B24         JEQ     ??display_command_18
+   \   00002A   5E83         SUB.B   #0x1, R14
+   \   00002C   3D24         JEQ     ??display_command_19
+   \   00002E   7E801900     SUB.B   #0x19, R14
+   \   000032   2824         JEQ     ??display_command_20
+   \   000034   7E800600     SUB.B   #0x6, R14
+   \   000038   2E24         JEQ     ??display_command_21
+   \   00003A   1001         RETA
+    315          	case 'F':
+    316          		for (int i = 0; i < 10; i++) {
+   \                     ??display_command_16:
+   \   00003C   0F43         MOV.W   #0x0, R15
+   \                     ??display_command_0:
+   \   00003E   3F900A00     CMP.W   #0xa, R15
+   \   000042   3B34         JGE     ??display_command_14
+    317          			iot_command_display[i] = forward[i];
+   \   000044   DF4F........ MOV.B   forward(R15), iot_command_display(R15)
+    318          		}
+   \   00004A   1F53         ADD.W   #0x1, R15
+   \   00004C   F83F         JMP     ??display_command_0
+    319          		break;
+    320          	case 'L':
+    321          		for (int i = 0; i < 10; i++) {
+   \                     ??display_command_17:
+   \   00004E   0F43         MOV.W   #0x0, R15
+   \                     ??display_command_1:
+   \   000050   3F900A00     CMP.W   #0xa, R15
+   \   000054   3234         JGE     ??display_command_14
+    322          			iot_command_display[i] = turn_left[i];
+   \   000056   DF4F........ MOV.B   turn_left(R15), iot_command_display(R15)
+    323          		}
+   \   00005C   1F53         ADD.W   #0x1, R15
+   \   00005E   F83F         JMP     ??display_command_1
+    324          		break;
+    325          
+    326          	case 'R':
+    327          		for (int i = 0; i < 10; i++) {
+   \                     ??display_command_18:
+   \   000060   0F43         MOV.W   #0x0, R15
+   \                     ??display_command_2:
+   \   000062   3F900A00     CMP.W   #0xa, R15
+   \   000066   2934         JGE     ??display_command_14
+    328          			iot_command_display[i] = turn_right[i];
+   \   000068   DF4F........ MOV.B   turn_right(R15), iot_command_display(R15)
+    329          		}
+   \   00006E   1F53         ADD.W   #0x1, R15
+   \   000070   F83F         JMP     ??display_command_2
+    330          		break;
+    331          
+    332          	case 'B':
+    333          		for (int i = 0; i < 10; i++) {
+   \                     ??display_command_15:
+   \   000072   0F43         MOV.W   #0x0, R15
+   \                     ??display_command_3:
+   \   000074   3F900A00     CMP.W   #0xa, R15
+   \   000078   2034         JGE     ??display_command_14
+    334          			iot_command_display[i] = reverse[i];
+   \   00007A   DF4F........ MOV.B   reverse(R15), iot_command_display(R15)
+    335          		}
+   \   000080   1F53         ADD.W   #0x1, R15
+   \   000082   F83F         JMP     ??display_command_3
+    336          		break;
+    337          
+    338          	case 'l':
+    339          		for (int i = 0; i < 10; i++) {
+   \                     ??display_command_20:
+   \   000084   0F43         MOV.W   #0x0, R15
+   \                     ??display_command_4:
+   \   000086   3F900A00     CMP.W   #0xa, R15
+   \   00008A   1734         JGE     ??display_command_14
+    340          			iot_command_display[i] = spin_left[i];
+   \   00008C   DF4F........ MOV.B   spin_left(R15), iot_command_display(R15)
+    341          		}
+   \   000092   1F53         ADD.W   #0x1, R15
+   \   000094   F83F         JMP     ??display_command_4
+    342          		break;
+    343          
+    344          	case 'r':
+    345          		for (int i = 0; i < 10; i++) {
+   \                     ??display_command_21:
+   \   000096   0F43         MOV.W   #0x0, R15
+   \                     ??display_command_5:
+   \   000098   3F900A00     CMP.W   #0xa, R15
+   \   00009C   0E34         JGE     ??display_command_14
+    346          			iot_command_display[i] = spin_right[i];
+   \   00009E   DF4F........ MOV.B   spin_right(R15), iot_command_display(R15)
+    347          		}
+   \   0000A4   1F53         ADD.W   #0x1, R15
+   \   0000A6   F83F         JMP     ??display_command_5
+    348          		break;
+    349          
+    350          	case 'S':
+    351          		for (int i = 0; i < 10; i++) {
+   \                     ??display_command_19:
+   \   0000A8   0F43         MOV.W   #0x0, R15
+   \                     ??display_command_6:
+   \   0000AA   3F900A00     CMP.W   #0xa, R15
+   \   0000AE   0534         JGE     ??display_command_14
+    352          			iot_command_display[i] = stop[i];
+   \   0000B0   DF4F........ MOV.B   stop(R15), iot_command_display(R15)
+    353          		}
+   \   0000B6   1F53         ADD.W   #0x1, R15
+   \   0000B8   F83F         JMP     ??display_command_6
+    354          		break;
+    355          
+    356          	default:break;
+    357          
+    358          	}
+    359          }
+   \                     ??display_command_14:
+   \   0000BA   1001         RETA
+    360          
+
+   \                                 In  segment CODE, align 2
+    361          void get_drive_data(void) {
+   \                     get_drive_data:
+    362          	if (iot_command_active) {
+   \   000000   C293....     CMP.B   #0x0, &iot_command_active
+   \   000004   0524         JEQ     ??get_drive_data_3
+    363          		drive_distance = RESET_STATE;
+   \   000006   8243....     MOV.W   #0x0, &drive_distance
+    364          		TB1CCTL1 &= ~CCIE;
+   \   00000A   B2C01000C403 BIC.W   #0x10, &0x3c4
+    365          	}
+    366          	IOT_COMMAND[iot_command_direct][iot_command_rd++] = NULL;
+   \                     ??get_drive_data_3:
+   \   000010   1F42....     MOV.W   &iot_command_direct, R15
+   \   000014   0F5F         RLA.W   R15
+   \   000016   0E4F         MOV.W   R15, R14
+   \   000018   5F06         RLAM.W  #0x2, R15
+   \   00001A   0F5E         ADD.W   R14, R15
+   \   00001C   1F52....     ADD.W   &iot_command_rd, R15
+   \   000020   CF43....     MOV.B   #0x0, IOT_COMMAND(R15)
+   \   000024   9253....     ADD.W   #0x1, &iot_command_rd
+    367          	for (int i = 0; i < (IOT_COMMAND[iot_command_direct][iot_command_rd] - 0x30); i++) {
+   \   000028   0E43         MOV.W   #0x0, R14
+   \                     ??get_drive_data_0:
+   \   00002A   1F42....     MOV.W   &iot_command_direct, R15
+   \   00002E   0F5F         RLA.W   R15
+   \   000030   0D4F         MOV.W   R15, R13
+   \   000032   5F06         RLAM.W  #0x2, R15
+   \   000034   0F5D         ADD.W   R13, R15
+   \   000036   1F52....     ADD.W   &iot_command_rd, R15
+   \   00003A   5F4F....     MOV.B   IOT_COMMAND(R15), R15
+   \   00003E   4F4F         MOV.B   R15, R15
+   \   000040   3F50D0FF     ADD.W   #0xffd0, R15
+   \   000044   0E9F         CMP.W   R15, R14
+   \   000046   0534         JGE     ??get_drive_data_4
+    368          		drive_distance += 100;
+   \   000048   B2506400.... ADD.W   #0x64, &drive_distance
+    369          	}
+   \   00004E   1E53         ADD.W   #0x1, R14
+   \   000050   EC3F         JMP     ??get_drive_data_0
+    370          	IOT_COMMAND[iot_command_direct][iot_command_rd] = NULL;
+   \                     ??get_drive_data_4:
+   \   000052   1F42....     MOV.W   &iot_command_direct, R15
+   \   000056   0F5F         RLA.W   R15
+   \   000058   0E4F         MOV.W   R15, R14
+   \   00005A   5F06         RLAM.W  #0x2, R15
+   \   00005C   0F5E         ADD.W   R14, R15
+   \   00005E   1F52....     ADD.W   &iot_command_rd, R15
+   \   000062   CF43....     MOV.B   #0x0, IOT_COMMAND(R15)
+    371          	iot_command_rd++;
+   \   000066   9253....     ADD.W   #0x1, &iot_command_rd
+    372          	for (int i = 0; i < (IOT_COMMAND[iot_command_direct][iot_command_rd] - 0x30); i++) {
+   \   00006A   0E43         MOV.W   #0x0, R14
+   \                     ??get_drive_data_1:
+   \   00006C   1F42....     MOV.W   &iot_command_direct, R15
+   \   000070   0F5F         RLA.W   R15
+   \   000072   0D4F         MOV.W   R15, R13
+   \   000074   5F06         RLAM.W  #0x2, R15
+   \   000076   0F5D         ADD.W   R13, R15
+   \   000078   1F52....     ADD.W   &iot_command_rd, R15
+   \   00007C   5F4F....     MOV.B   IOT_COMMAND(R15), R15
+   \   000080   4F4F         MOV.B   R15, R15
+   \   000082   3F50D0FF     ADD.W   #0xffd0, R15
+   \   000086   0E9F         CMP.W   R15, R14
+   \   000088   0534         JGE     ??get_drive_data_5
+    373          		drive_distance += 10;
+   \   00008A   B2500A00.... ADD.W   #0xa, &drive_distance
+    374          	}
+   \   000090   1E53         ADD.W   #0x1, R14
+   \   000092   EC3F         JMP     ??get_drive_data_1
+    375          	IOT_COMMAND[iot_command_direct][iot_command_rd] = NULL;
+   \                     ??get_drive_data_5:
+   \   000094   1F42....     MOV.W   &iot_command_direct, R15
+   \   000098   0F5F         RLA.W   R15
+   \   00009A   0E4F         MOV.W   R15, R14
+   \   00009C   5F06         RLAM.W  #0x2, R15
+   \   00009E   0F5E         ADD.W   R14, R15
+   \   0000A0   1F52....     ADD.W   &iot_command_rd, R15
+   \   0000A4   CF43....     MOV.B   #0x0, IOT_COMMAND(R15)
+    376          	iot_command_rd++;
+   \   0000A8   9253....     ADD.W   #0x1, &iot_command_rd
+    377          	for (int i = 0; i < (IOT_COMMAND[iot_command_direct][iot_command_rd] - 0x30); i++) {
+   \   0000AC   0E43         MOV.W   #0x0, R14
+   \                     ??get_drive_data_2:
+   \   0000AE   1F42....     MOV.W   &iot_command_direct, R15
+   \   0000B2   0F5F         RLA.W   R15
+   \   0000B4   0D4F         MOV.W   R15, R13
+   \   0000B6   5F06         RLAM.W  #0x2, R15
+   \   0000B8   0F5D         ADD.W   R13, R15
+   \   0000BA   1F52....     ADD.W   &iot_command_rd, R15
+   \   0000BE   5F4F....     MOV.B   IOT_COMMAND(R15), R15
+   \   0000C2   4F4F         MOV.B   R15, R15
+   \   0000C4   3F50D0FF     ADD.W   #0xffd0, R15
+   \   0000C8   0E9F         CMP.W   R15, R14
+   \   0000CA   0434         JGE     ??get_drive_data_6
+    378          		drive_distance += 1;
+   \   0000CC   9253....     ADD.W   #0x1, &drive_distance
+    379          	}
+   \   0000D0   1E53         ADD.W   #0x1, R14
+   \   0000D2   ED3F         JMP     ??get_drive_data_2
+    380          	IOT_COMMAND[iot_command_direct][iot_command_rd] = NULL;
+   \                     ??get_drive_data_6:
+   \   0000D4   1F42....     MOV.W   &iot_command_direct, R15
+   \   0000D8   0F5F         RLA.W   R15
+   \   0000DA   0E4F         MOV.W   R15, R14
+   \   0000DC   5F06         RLAM.W  #0x2, R15
+   \   0000DE   0F5E         ADD.W   R14, R15
+   \   0000E0   1F52....     ADD.W   &iot_command_rd, R15
+   \   0000E4   CF43....     MOV.B   #0x0, IOT_COMMAND(R15)
+    381          	iot_command_direct++;
+   \   0000E8   9253....     ADD.W   #0x1, &iot_command_direct
+    382          	if (iot_command_direct >= 5) {
+   \   0000EC   B2900500.... CMP.W   #0x5, &iot_command_direct
+   \   0000F2   0228         JNC     ??get_drive_data_7
+    383          		iot_command_direct = BEGINNING;
+   \   0000F4   8243....     MOV.W   #0x0, &iot_command_direct
+    384          	}
+    385          	iot_command_rd = RESET_STATE;
+   \                     ??get_drive_data_7:
+   \   0000F8   8243....     MOV.W   #0x0, &iot_command_rd
+    386          }
+   \   0000FC   1001         RETA
+   \   0000FE                REQUIRE _A_TB1CCTL1_L
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for speed>`:
+   \   000000   30           DC8 48
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for iot_fram_command_message>`:
+   \   000000   494F54204652 DC8 "IOT FRAM"
+   \            414D00      
+   \   000009   000000000000 DC8 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+   \            000000000000
+   \            000000000000
+   \            0000000000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for pc_fram_command_message>`:
+   \   000000   504320465241 DC8 "PC FRAM"
+   \            4D00        
+   \   000008   000000000000 DC8 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+   \            000000000000
+   \            00000000    
+   \   000018   000000000000 DC8 0, 0, 0, 0, 0, 0, 0, 0
+   \            0000        
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for forward>`:
+   \   000000   20464F525741 DC8 " FORWARD  "
+   \            5244202000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for turn_left>`:
+   \   000000   5455524E204C DC8 "TURN LEFT "
+   \            4546542000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for turn_right>`:
+   \   000000   5455524E2052 DC8 "TURN RIGHT"
+   \            4947485400  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for reverse>`:
+   \   000000   205245564552 DC8 " REVERSE  "
+   \            5345202000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for spin_left>`:
+   \   000000   5350494E204C DC8 "SPIN LEFT "
+   \            4546542000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for spin_right>`:
+   \   000000   5350494E2052 DC8 "SPIN RIGHT"
+   \            4947485400  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for stop>`:
+   \   000000   20202053544F DC8 "   STOP   "
+   \            5020202000  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for at>`:
+   \   000000   540D00       DC8 "T\015"
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for at_nstat>`:
+   \   000000   542B4E535441 DC8 "T+NSTAT=?\015"
+   \            543D3F0D00  
+
+   \                                 In  segment DATA16_ID, align 1, align-sorted
+   \                     `?<Initializer for at_nstcp>`:
+   \   000000   542B4E535443 DC8 "T+NSTCP=65001,1\015"
+   \            503D36353030
+   \            312C310D00  
+   \   000011   00           DC8 0
+    387          
+
+   Maximum stack usage in bytes:
+
+   CSTACK Function
+   ------ --------
+      4   baud
+        4   -> Init_Serial_UCA0
+      4   carrot_command_buffer
+        4   -> baud
+      4   display_command
+      4   get_drive_data
+      4   iot_command_buffer
+        4   -> display_command
+        4   -> get_drive_data
+      4   transmit_2_iot
+
+
+   Segment part sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       3  ?<Initializer for at>
+      11  ?<Initializer for at_nstat>
+      18  ?<Initializer for at_nstcp>
+      11  ?<Initializer for forward>
+      32  ?<Initializer for iot_fram_command_message>
+      32  ?<Initializer for pc_fram_command_message>
+      11  ?<Initializer for reverse>
+       1  ?<Initializer for speed>
+      11  ?<Initializer for spin_left>
+      11  ?<Initializer for spin_right>
+      11  ?<Initializer for stop>
+      11  ?<Initializer for turn_left>
+      11  ?<Initializer for turn_right>
+       2  _A_TB1CCTL1_L
+       2  _A_TB1CCTL2_L
+       2  _A_UCA0IE_L
+       2  _A_UCA0TXBUF_L
+       3  at
+      11  at_nstat
+      18  at_nstcp
+      20  baud
+     330  carrot_command_buffer
+       2  carrot_rd
+       2  change_baud
+       1  course_timer_increment
+     188  display_command
+       2  drive_distance
+      11  forward
+       2  fram_2_iot_ready
+       2  get_SSID
+     254  get_drive_data
+       2  get_ok
+       1  iot_command_active
+     426  iot_command_buffer
+       2  iot_command_rd
+       2  iot_first_command
+      32  iot_fram_command_message
+       2  iot_pb_index
+       2  iot_pb_updated
+      32  iot_process_buff
+       2  marker_count
+       1  marker_found
+      32  pc_fram_command_message
+      11  reverse
+       2  send_at
+       1  send_nstcp
+       1  speed
+      11  spin_left
+      11  spin_right
+      11  stop
+      86  transmit_2_iot
+      11  turn_left
+      11  turn_right
+       2  usb_pb_index
+       2  usb_pb_updated
+      32  usb_process_buff
+
+ 
+ 1 304 bytes in segment CODE
+     8 bytes in segment DATA16_AN
+   174 bytes in segment DATA16_I
+   174 bytes in segment DATA16_ID
+    96 bytes in segment DATA16_Z
+ 
+ 1 304 bytes of CODE  memory
+   174 bytes of CONST memory
+   270 bytes of DATA  memory (+ 8 bytes shared)
+
+Errors: none
+Warnings: none

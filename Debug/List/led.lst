@@ -1,0 +1,110 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V7.20.1.997/W32 for MSP430           08/Sep/2020  13:47:22
+# Copyright 1996-2020 IAR Systems AB.
+# PC-locked license - IAR Embedded Workbench for MSP430, 8K KickStart Edition 7.20
+#
+#    __rt_version  =  3
+#    __double_size =  32
+#    __reg_r4      =  free
+#    __reg_r5      =  free
+#    __pic         =  no
+#    __core        =  430X
+#    __data_model  =  small
+#    __code_model  =  large
+#    Source file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_03\led.c
+#    Command line  =  
+#        -f C:\Users\19196\AppData\Local\Temp\EWA693.tmp
+#        ("C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_03\led.c"
+#        -lC "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_03\Debug\List" -o
+#        "C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_03\Debug\Obj" --no_cse --no_unroll --no_inline
+#        --no_code_motion --no_tbaa --debug -D__MSP430FR2355__ -e --double=32
+#        --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.4\430\lib\dlib\dl430xlsfn.h" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.4\430\" --core=430X --data_model=small
+#        -On --multiplier=32 --hw_workaround=CPU40 --code_model=large)
+#    Locale        =  English_USA.1252
+#    List file     =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_03\Debug\List\led.lst
+#    Object file   =  
+#        C:\Users\19196\OneDrive\Documents\ECE 306
+#        current\Project_03\Debug\Obj\led.r43
+#
+###############################################################################
+
+C:\Users\19196\OneDrive\Documents\ECE 306 current\Project_03\led.c
+      1          //	Filename: led.c
+      2          //
+      3          //	Description: This file is used for LED Initialization..
+      4          //	
+      5          //
+      6          //	Author: Cody Lane
+      7          //	Date: 08/30/2020
+      8          // 
+      9          //	Compiler: Built with IAR Embedded Workbench 7.20.1
+     10          
+     11          
+     12          
+     13          #include "macros.h"
+     14          #include  "functions.h"
+     15          #include  "msp430.h"
+
+   \                                 In  segment DATA16_AN, at 0x202
+   \   union <unnamed> _A_PAOUT_L
+   \                     _A_PAOUT_L:
+   \   000000                DS8 2
+
+   \                                 In  segment DATA16_AN, at 0x242
+   \   union <unnamed> _A_PCOUT_L
+   \                     _A_PCOUT_L:
+   \   000000                DS8 2
+     16          #include <string.h>
+     17          
+     18          
+     19          //	This function initializes the LEDs.
+
+   \                                 In  segment CODE, align 2
+     20          void Init_LEDs(void) {
+   \                     Init_LEDs:
+     21          	//------------------------------------------------------------------------------
+     22          	// LED Configurations
+     23          	//------------------------------------------------------------------------------
+     24          	// Turns on both LEDs
+     25          	P1OUT &= ~RED_LED;
+   \   000000   D2C30202     BIC.B   #0x1, &0x202
+     26          	P6OUT &= ~GRN_LED;
+   \   000004   F2C040004302 BIC.B   #0x40, &0x243
+     27          	//------------------------------------------------------------------------------
+     28          }
+   \   00000A   1001         RETA
+   \   00000C                REQUIRE _A_PAOUT_L
+   \   00000C                REQUIRE _A_PCOUT_L
+
+   Maximum stack usage in bytes:
+
+   CSTACK Function
+   ------ --------
+      4   Init_LEDs
+
+
+   Segment part sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      12  Init_LEDs
+       2  _A_PAOUT_L
+       2  _A_PCOUT_L
+
+ 
+ 12 bytes in segment CODE
+  4 bytes in segment DATA16_AN
+ 
+ 12 bytes of CODE memory
+  0 bytes of DATA memory (+ 4 bytes shared)
+
+Errors: none
+Warnings: none
